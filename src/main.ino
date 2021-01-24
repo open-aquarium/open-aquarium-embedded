@@ -2,6 +2,11 @@
   Open Aquarium - Data logger
 */
 
+const int INBUILD_LED = 13;
+const int STATUS_LED = 12;
+
+const int TEMPERATURE_SENSOR = A0;
+
 const String deviceSerialNumber = "1234567890";
 const String hardwareVersion = "0.1.0";
 const String softwareVersion = "0.1.1";
@@ -129,11 +134,49 @@ String getCurrentDate() {
 }
 
 float readDeviceTemperature() {
-  return random(20, 70); // mocked value
+  if(getHwVersion() == "0.1.0") {
+    return random(20, 70); // mocked value
+  } else {
+    return readDeviceInbuiltTemperature();
+  }
+}
+
+float readDeviceInbuiltTemperature() {
+  // https://playground.arduino.cc/Main/InternalTemperatureSensor/
+  unsigned int wADC;
+  double t;
+
+  // The internal temperature has to be used
+  // with the internal reference of 1.1V.
+  // Channel 8 can not be selected with
+  // the analogRead function yet.
+
+  // Set the internal reference and mux.
+  ADMUX = (_BV(REFS1) | _BV(REFS0) | _BV(MUX3));
+  ADCSRA |= _BV(ADEN);  // enable the ADC
+
+  delay(20);            // wait for voltages to become stable.
+
+  ADCSRA |= _BV(ADSC);  // Start the ADC
+
+  // Detect end-of-conversion
+  while (bit_is_set(ADCSRA,ADSC));
+
+  // Reading register "ADCW" takes care of how to read ADCL and ADCH.
+  wADC = ADCW;
+
+  // The offset of 324.31 could be wrong. It is just an indication.
+  t = (wADC - 324.31 ) / 1.22;
+  return t;
 }
 
 float readRoomTemperature() {
-  return random(20, 40); // mocked value
+  //return random(20, 40); // mocked value
+  float temperatureVoltage = 0;
+  //float temperatureC = 0;
+  temperatureVoltage = (analogRead(TEMPERATURE_SENSOR) * 0.004882814);
+  //temperatureC = ((temperatureVoltage - 0.5) * 100);
+  return ((temperatureVoltage - 0.5) * 100);
 }
 
 float readRoomHumidity() {
@@ -215,19 +258,29 @@ String createRoomSampleBlock() {
 }
 
 void flashStatusLed() {
-  if(digitalRead(13) == HIGH) {
-    digitalWrite(13, LOW);
+  if(digitalRead(INBUILD_LED) == HIGH) {
+    digitalWrite(INBUILD_LED, LOW);
   } else {
-    digitalWrite(13, HIGH);
+    digitalWrite(INBUILD_LED, HIGH);
+  }
+  if(digitalRead(STATUS_LED) == HIGH) {
+    digitalWrite(STATUS_LED, LOW);
+  } else {
+    digitalWrite(STATUS_LED, HIGH);
   }
 }
 
 void statusLedSetError() {
-  digitalWrite(13, HIGH);
+  digitalWrite(INBUILD_LED, HIGH);
+  digitalWrite(STATUS_LED, HIGH);
 }
 
 void setup() {
-  pinMode(13, OUTPUT);
+  pinMode(INBUILD_LED, OUTPUT);
+  pinMode(STATUS_LED, OUTPUT);
+  
+  pinMode(TEMPERATURE_SENSOR, INPUT);
+  
   Serial.begin(9600);
   
   calibrate();
