@@ -2,10 +2,25 @@
   Open Aquarium - Data logger
 */
 
+/**
+ * DEVICE
+ **/
 const int INBUILD_LED = 13;
 const int STATUS_LED = 12;
+const int DEVICE_STATUS_LED_RED = 12;
+const int DEVICE_STATUS_LED_BLUE = 11;
+const int DEVICE_STATUS_LED_GREEN = 10;
+const int DEVICE_TEMPERATURE_SENSOR = A0;
 
-const int TEMPERATURE_SENSOR = A0;
+/**
+ * ROOM
+ **/
+const int ROOM_TEMPERATURE_SENSOR = A3;
+
+/**
+ * WATER
+ **/
+const int WATER_TEMPERATURE_SENSOR = A5;
 
 const String deviceSerialNumber = "1234567890";
 const String hardwareVersion = "0.1.0";
@@ -17,10 +32,54 @@ int halt = 0;
 
 int discoveryMockCounter = 0;
 int turnOffMockCounter = 0;
-const int turnOffMockThreshold = 2;
+const int turnOffMockThreshold = 3;
+
+void turnStatusLedOff() {
+    digitalWrite(DEVICE_STATUS_LED_RED, LOW);
+    digitalWrite(DEVICE_STATUS_LED_GREEN, LOW);
+    digitalWrite(DEVICE_STATUS_LED_BLUE, LOW);
+}
+
+void turnStatusLedWhite() {
+    digitalWrite(DEVICE_STATUS_LED_RED, HIGH);
+    digitalWrite(DEVICE_STATUS_LED_GREEN, HIGH);
+    digitalWrite(DEVICE_STATUS_LED_BLUE, HIGH);
+}
+
+void turnStatusLedRed() {
+    //log("turn status led RED");
+    digitalWrite(DEVICE_STATUS_LED_RED, HIGH);
+    digitalWrite(DEVICE_STATUS_LED_GREEN, LOW);
+    digitalWrite(DEVICE_STATUS_LED_BLUE, LOW);
+}
+
+void turnStatusLedGreen() {
+    //log("turn status led GREEN");
+    digitalWrite(DEVICE_STATUS_LED_RED, LOW);
+    digitalWrite(DEVICE_STATUS_LED_GREEN, HIGH);
+    digitalWrite(DEVICE_STATUS_LED_BLUE, LOW);
+}
+
+void turnStatusLedBlue() {
+    //log("turn status led BLUE");
+    digitalWrite(DEVICE_STATUS_LED_RED, LOW);
+    digitalWrite(DEVICE_STATUS_LED_GREEN, LOW);
+    digitalWrite(DEVICE_STATUS_LED_BLUE, HIGH);
+}
+
+void turnStatusLedYellow() {
+    //log("turn status led YELLOW");
+    digitalWrite(DEVICE_STATUS_LED_RED, HIGH);
+    digitalWrite(DEVICE_STATUS_LED_GREEN, HIGH);
+    digitalWrite(DEVICE_STATUS_LED_BLUE, LOW);
+}
 
 void calibrate() {
   log("calibrate");
+  for (int i = 0; i <= 1000; i++) {
+    delay(10);
+  }
+  turnStatusLedGreen();
 }
 
 bool triggerDiscovery() {
@@ -55,6 +114,7 @@ void turnOffEvent() {
 }
 
 void periodicEvent() {
+  //createWaterSampleBlock
   String waterTemperature = "temperature: ";
   waterTemperature.concat(readWaterTemperature());
   
@@ -95,6 +155,19 @@ void periodicEvent() {
   logEventSimple(eventWaterSample2);
   logEventSimple(eventWaterSample3);
   logEvent(" }");
+
+  /* DEBUG
+  String deviceTemperature = "Device temperature: ";
+  deviceTemperature.concat(readDeviceTemperature());
+  logEvent(deviceTemperature);
+
+  String roomTemperature = "Room temperature: ";
+  roomTemperature.concat(readRoomTemperature());
+  logEvent(roomTemperature);
+
+  String waterTemperature123 = "Water temperature: ";
+  waterTemperature123.concat(readWaterTemperature());
+  logEvent(waterTemperature123);*/
 }
 
 void log(String message) {
@@ -135,8 +208,12 @@ String getCurrentDate() {
 
 float readDeviceTemperature() {
   if(getHwVersion() == "0.1.0") {
-    return random(20, 70); // mocked value
+    //return random(20, 70); // mocked value
+    float temperatureVoltage = 0;
+    temperatureVoltage = (analogRead(DEVICE_TEMPERATURE_SENSOR) * 0.004882814);
+    return ((temperatureVoltage - 0.5) * 100);
   } else {
+    // only a few of arduino boards have an inbuild sensor
     return readDeviceInbuiltTemperature();
   }
 }
@@ -174,7 +251,7 @@ float readRoomTemperature() {
   //return random(20, 40); // mocked value
   float temperatureVoltage = 0;
   //float temperatureC = 0;
-  temperatureVoltage = (analogRead(TEMPERATURE_SENSOR) * 0.004882814);
+  temperatureVoltage = (analogRead(ROOM_TEMPERATURE_SENSOR) * 0.004882814);
   //temperatureC = ((temperatureVoltage - 0.5) * 100);
   return ((temperatureVoltage - 0.5) * 100);
 }
@@ -188,7 +265,9 @@ float readAtmosphericPressure() {
 }
 
 float readWaterTemperature() {
-  return random(20, 30);
+  float temperatureVoltage = 0;
+  temperatureVoltage = (analogRead(WATER_TEMPERATURE_SENSOR) * 0.004882814);
+  return ((temperatureVoltage - 0.5) * 100);
 }
 
 float readWaterPotentialOfHydrogen() {
@@ -257,30 +336,50 @@ String createRoomSampleBlock() {
   return eventRoomSample;
 }
 
+String createWaterSampleBlock() {
+  /*String eventRoomSample = "waterSample: { ";
+  String waterTemperature = "temperature: ";
+  waterTemperature.concat(readRoomTemperature());
+  eventRoomSample += waterTemperature;
+  eventRoomSample += " }";
+  return eventRoomSample;*/
+  //periodicEvent
+  return "{}";
+}
+
 void flashStatusLed() {
   if(digitalRead(INBUILD_LED) == HIGH) {
     digitalWrite(INBUILD_LED, LOW);
   } else {
     digitalWrite(INBUILD_LED, HIGH);
   }
-  if(digitalRead(STATUS_LED) == HIGH) {
-    digitalWrite(STATUS_LED, LOW);
+  if(digitalRead(DEVICE_STATUS_LED_RED) == HIGH) {
+    turnStatusLedOff();
   } else {
-    digitalWrite(STATUS_LED, HIGH);
+    turnStatusLedRed();
   }
 }
 
 void statusLedSetError() {
   digitalWrite(INBUILD_LED, HIGH);
-  digitalWrite(STATUS_LED, HIGH);
+  //digitalWrite(STATUS_LED, HIGH);
+  turnStatusLedRed();
 }
 
 void setup() {
   pinMode(INBUILD_LED, OUTPUT);
   pinMode(STATUS_LED, OUTPUT);
   
-  pinMode(TEMPERATURE_SENSOR, INPUT);
+  pinMode(DEVICE_STATUS_LED_RED, OUTPUT);
+  pinMode(DEVICE_STATUS_LED_GREEN, OUTPUT);
+  pinMode(DEVICE_STATUS_LED_BLUE, OUTPUT);
+
+  pinMode(DEVICE_TEMPERATURE_SENSOR, INPUT);
   
+  pinMode(ROOM_TEMPERATURE_SENSOR, INPUT);
+
+  pinMode(WATER_TEMPERATURE_SENSOR, INPUT);
+  turnStatusLedYellow();
   Serial.begin(9600);
   
   calibrate();
@@ -291,7 +390,7 @@ void loop() {
     statusLedSetError();
     return;
   }
-  flashStatusLed();
+  //flashStatusLed();
   turnOffMock();
   if(readyState == 0) {
     turnOnEvent();
