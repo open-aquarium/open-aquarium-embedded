@@ -1,7 +1,11 @@
 #ifndef OA_EVENT_HEADER_BLOCK_H
 #define OA_EVENT_HEADER_BLOCK_H
-//#include <string>
+#include <Arduino.h>
 
-typedef struct HeaderBlockStruct HeaderBlock;
+typedef struct {
+  String type;
+  String eventId;
+  String triggerTime;
+} HeaderBlock;
 
 #endif
