@@ -33,7 +33,7 @@ Recommended workflow
 
 - Make changes
 - Commit those changes
-- Make sure Travis turns green
+- Make sure CI turns green
 - Bump version in package.json
 - Generate Changelog
 - Commit package.json and CHANGELOG.md files
