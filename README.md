@@ -27,3 +27,15 @@
 
 - https://learn.adafruit.com/dht
 
+## Release Workflow
+
+Recommended workflow
+
+- Make changes
+- Commit those changes
+- Make sure Travis turns green
+- Bump version in package.json
+- Generate Changelog
+- Commit package.json and CHANGELOG.md files
+- Tag
+- Push
