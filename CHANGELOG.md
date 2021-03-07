@@ -3,4 +3,7 @@
 
 ### Features
 
-* **dht22:** Resolves open-aquarium/open-aquarium[#16](https://github.com/open-aquarium/open-aquarium-embedded/issues/16). Add DHT22 temperature and humidity readings ([d2554fe](https://github.com/open-aquarium/open-aquarium-embedded/commit/d2554fe24a66862cce81dfba37cdd00f4dbdb0a8))
+* **dht22:** add DHT22 temperature and humidity readings ([df56e04](https://github.com/open-aquarium/open-aquarium-embedded/commit/df56e0449cccb7873336a08257c6ba5a75b93b6e)), closes [open-aquarium/open-aquarium#16](https://github.com/open-aquarium/open-aquarium/issues/16)
+
+
+
