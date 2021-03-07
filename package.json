@@ -22,6 +22,6 @@
   },
   "scripts": {
     "commit:tool": "cz",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
+    "changelog": "conventional-changelog --preset angular --infile CHANGELOG.md --same-file --release-count 1"
   }
 }
