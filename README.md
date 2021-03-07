@@ -27,6 +27,10 @@
 
 - https://learn.adafruit.com/dht
 
+### Photocells
+
+- https://learn.adafruit.com/photocells/overview
+
 ## Release Workflow
 
 Recommended workflow
