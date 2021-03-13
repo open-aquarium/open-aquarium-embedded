@@ -27,6 +27,10 @@
 
 - https://learn.adafruit.com/dht
 
+### OLED Display
+
+- https://www.arduinoecia.com.br/tutorial-display-oled-arduino-ssd1306/
+
 ### Photocells
 
 - https://learn.adafruit.com/photocells/overview
