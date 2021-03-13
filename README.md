@@ -30,6 +30,7 @@
 ### OLED Display
 
 - https://www.arduinoecia.com.br/tutorial-display-oled-arduino-ssd1306/
+- https://lastminuteengineers.com/oled-display-arduino-tutorial/
 
 ### Photocells
 

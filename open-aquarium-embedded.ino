@@ -6,6 +6,9 @@ DHT dht(DHTPIN, DHTTYPE);
 
 #define LDRPIN 3
 
+unsigned long lastExecution = 0;
+unsigned long lastBlink = 0;
+
 /**DISPLAY - BEGIN*************************************************************/
 #include <SPI.h>
 #include <Wire.h>
@@ -24,12 +27,15 @@ DHT dht(DHTPIN, DHTTYPE);
 
 Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
 
+unsigned long lastDisplay = 0;
+
 void setupDisplay() {
   display.begin(SSD1306_SWITCHCAPVCC);
   display.clearDisplay();
 }
 
 void displayWelcomeMessage() {
+  display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0,0);
@@ -42,6 +48,7 @@ void displayWelcomeMessage() {
 }
 
 void displayFusRoDah() {
+  display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0,0);
@@ -49,19 +56,71 @@ void displayFusRoDah() {
   display.println();
   display.println();
   display.setTextSize(2);
-  display.println(F(" FUS RO DAH!"));
+  display.println(F("FUS RO DAH"));
   display.display();
+}
+
+void displayData(float humidity, float temperature, float heatIndex, int light) {
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+  display.setCursor(0,0);
+  display.cp437(true);
+  
+  display.setTextSize(2);
+  display.println(F("READINGS"));
+  
+  display.setTextSize(1);
+  
+  display.print(F("Humidity: "));
+  display.print(humidity);
+  display.println(F("%"));
+  
+  display.print(F("Temperature: "));
+  display.print(temperature);
+  display.write(167);
+  display.println(F("C"));
+  
+  display.print(F("Heat index: "));
+  display.println(heatIndex);
+  display.write(167);
+  display.println(F("C"));
+  
+  display.print(F("Light: "));
+  if(light == 0) {
+    display.println(F("ON"));
+  } else {
+    display.println(F("OFF"));
+  }
+//  display.println(light);
+  
+  display.display();
+}
+
+void sleepDisplay() {
+  display.ssd1306_command(SSD1306_DISPLAYOFF);
+}
+
+void wakeDisplay() {
+  display.ssd1306_command(SSD1306_DISPLAYON);
 }
 /**DISPLAY - END***************************************************************/
 
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  Serial.println(F("Dovahkiin!"));
+int statusLedState = LOW;
+float humidity = -32768.99;
+float temperature = -32768.99;
+float heatIndex = -32768.99;
+int light = -32768;
 
+void setup() {
+  Serial.begin(9600);
+  
   setupDisplay();
   displayWelcomeMessage();
-
+  delay(2000);
+  displayFusRoDah();
+  delay(5000);
+  sleepDisplay();
+  
   pinMode(LED_BUILTIN, OUTPUT);
 
   // DHT
@@ -72,36 +131,56 @@ void setup() {
 }
 
 void loop() {
-  Serial.println(F("FUS RO DAH!"));
-  digitalWrite(LED_BUILTIN, LOW);
-  displayFusRoDah();
-  delay(5000);
-  display.clearDisplay();
+  unsigned long currentExecution = millis();
 
-  digitalWrite(LED_BUILTIN, HIGH);
-
-  // DHT
-  float h = dht.readHumidity();
-  float t = dht.readTemperature(); // Celsius
-
-  if (isnan(h) || isnan(t)) {
-    Serial.println(F("Failed to read from DHT sensor!"));
-    return;
+  if(currentExecution - lastBlink >= 500) {
+    lastBlink = currentExecution;
+    if(statusLedState == LOW) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      statusLedState = HIGH;
+    } else {
+      digitalWrite(LED_BUILTIN, LOW);
+      statusLedState = LOW;
+    }
+  }
+  
+  if(currentExecution - lastExecution >= 5000) {
+    lastExecution = currentExecution;
+    
+    // DHT
+    humidity = dht.readHumidity();
+    temperature = dht.readTemperature(); // Celsius
+  
+    if (isnan(humidity) || isnan(temperature)) {
+      Serial.println(F("Failed to read from DHT sensor!"));
+      return;
+    }
+  
+    heatIndex = dht.computeHeatIndex(temperature, humidity, false);
+  
+    // LDR
+    light = digitalRead(LDRPIN);
+  
+    Serial.print(F("Humidity: "));
+    Serial.print(humidity);
+    Serial.print(F("%  Temperature: "));
+    Serial.print(temperature);
+    Serial.print(F("°C "));
+    Serial.print(F("  Heat index: "));
+    Serial.print(heatIndex);
+    Serial.print(F("°C "));
+    Serial.print(F("  Light: "));
+    Serial.println(light);
   }
 
-  float hic = dht.computeHeatIndex(t, h, false);
-
-  // LDR
-  int light = digitalRead(LDRPIN);
-
-  Serial.print(F("Humidity: "));
-  Serial.print(h);
-  Serial.print(F("%  Temperature: "));
-  Serial.print(t);
-  Serial.print(F("°C "));
-  Serial.print(F("  Heat index: "));
-  Serial.print(hic);
-  Serial.print(F("°C "));
-  Serial.print(F("  Light: "));
-  Serial.println(light);
+  // Sleep?
+  if(currentExecution - lastDisplay >= 5000) {
+    sleepDisplay();
+  }
+  // Display it?
+  if(currentExecution - lastDisplay >= 20000) {
+    lastDisplay = currentExecution;
+    wakeDisplay();
+    displayData(humidity, temperature, heatIndex, light);
+  }
 }
