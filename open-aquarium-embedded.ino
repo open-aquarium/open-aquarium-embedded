@@ -105,6 +105,12 @@ void wakeDisplay() {
 }
 /**DISPLAY - END***************************************************************/
 
+/**BUZZER - BEGIN**************************************************************/
+#include "src/buzzer/Buzzer.h"
+const byte PASSIVE_BUZZER = 12;
+Buzzer buzz(PASSIVE_BUZZER);
+/**BUZZER - END****************************************************************/
+
 int statusLedState = LOW;
 float humidity = -32768.99;
 float temperature = -32768.99;
@@ -113,12 +119,13 @@ int light = -32768;
 
 void setup() {
   Serial.begin(9600);
+  buzz.playBeep();
   
   setupDisplay();
   displayWelcomeMessage();
-  delay(2000);
+//  delay(2000);
   displayFusRoDah();
-  delay(5000);
+//  delay(5000);
   sleepDisplay();
   
   pinMode(LED_BUILTIN, OUTPUT);
