@@ -4,10 +4,10 @@ explicit Buzzer::Buzzer(byte pin) {
   this->pin = pin;
 }
 
-void Buzzer::play(int melody[], int tempo) {
+void Buzzer::play(int melody[], size_t melodySize, int tempo) {
   // sizeof gives the number of bytes, each int value is composed of two bytes (16 bits)
   // there are two values per note (pitch and duration), so for each note there are four bytes
-  int notes = sizeof(melody) / 2;
+  int notes = melodySize / 2;
   // this calculates the duration of a whole note in ms
   int wholenote = (60000 * 4) / tempo;
   int divider = 0, noteDuration = 0;
@@ -35,5 +35,28 @@ void Buzzer::play(int melody[], int tempo) {
 }
 
 void Buzzer::playBeep() {
-  this->play(this->beepMelody);
+  int size = sizeof(this->beepMelody) / sizeof(this->beepMelody[0]);
+  this->play(this->beepMelody, size);
 }
+
+#ifdef OA_MELODIES_H
+void Buzzer::playPacman() {
+  int size = sizeof(pacmanMelody) / sizeof(pacmanMelody[0]);
+  this->play(pacmanMelody, size, 105);
+}
+
+void Buzzer::playImperialMarch() {
+  int size = sizeof(imperialMarchMelody) / sizeof(imperialMarchMelody[0]);
+  this->play(imperialMarchMelody, size, 120);
+}
+
+void Buzzer::playSuperMario() {
+  int size = sizeof(superMarioMelody) / sizeof(superMarioMelody[0]);
+  this->play(superMarioMelody, size, 200);
+}
+
+void Buzzer::playZelda() {
+  int size = sizeof(zeldaMelody) / sizeof(zeldaMelody[0]);
+  this->play(zeldaMelody, size, 88);
+}
+#endif

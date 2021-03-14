@@ -2,6 +2,7 @@
 #define OA_BUZZER_H
 
 #include "Pitches.h"
+#include "Melodies.h"
 #include <Arduino.h>
 
 class Buzzer {
@@ -18,11 +19,19 @@ class Buzzer {
 
     explicit Buzzer(byte pin);
 
-    void play(int melody[], int tempo = 88);
+    void play(int melody[], size_t melodySize, int tempo = 88);
 
     void playBeep();
 
-    // void playSuperMario();
+    #ifdef OA_MELODIES_H
+    void playPacman();
+
+    void playImperialMarch();
+
+    void playSuperMario();
+
+    void playZelda();
+    #endif
     
 };
 
