@@ -106,9 +106,9 @@ void wakeDisplay() {
 /**DISPLAY - END***************************************************************/
 
 /**BUZZER - BEGIN**************************************************************/
-#include "lib/buzzer/Buzzer.h"
+#include "src/buzzer/Buzzer.h"
 const byte PASSIVE_BUZZER = 12;
-Buzzer buzz(byte(PASSIVE_BUZZER));
+Buzzer buzz(PASSIVE_BUZZER);
 /**BUZZER - END****************************************************************/
 
 int statusLedState = LOW;
@@ -119,6 +119,7 @@ int light = -32768;
 
 void setup() {
   Serial.begin(9600);
+  buzz.playBeep();
   
   setupDisplay();
   displayWelcomeMessage();
@@ -134,8 +135,6 @@ void setup() {
 
   // LDR (photoresistor)
   pinMode(LDRPIN, INPUT);
-
-//  playSong();
 }
 
 void loop() {
