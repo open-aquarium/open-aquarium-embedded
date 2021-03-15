@@ -111,6 +111,11 @@ const byte PASSIVE_BUZZER = 12;
 Buzzer buzz(PASSIVE_BUZZER);
 /**BUZZER - END****************************************************************/
 
+/**DEVICE - BEGIN**************************************************************/
+#include "src/device/Device.h"
+Device dev;
+/**DEVICE - END****************************************************************/
+
 int statusLedState = LOW;
 float humidity = -32768.99;
 float temperature = -32768.99;
@@ -177,7 +182,9 @@ void loop() {
     Serial.print(heatIndex);
     Serial.print(F("°C "));
     Serial.print(F("  Light: "));
-    Serial.println(light);
+    Serial.print(light);
+    Serial.print(F("  SRAM: "));
+    Serial.println(dev.getFreeSRAM());
   }
 
   // Sleep?
