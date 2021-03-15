@@ -1,6 +1,6 @@
 {
   "name": "open-aquarium-embedded",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Open Aquarium Embedded",
   "main": "index.js",
   "repository": "git@github.com:open-aquarium/open-aquarium-embedded.git",
