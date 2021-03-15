@@ -1,19 +1,7 @@
 #ifndef OA_DEVICE_H
 #define OA_DEVICE_H
 
-class Device
-{
-    public:
-    // double x;
-    // double y;
-
-    // virtual double area() = 0;
-    int getFreeSRAM();
-    // int getFreeFlash();
-    // int getFreeEEPROM();
-};
-
-#endif
+#include <Arduino.h>
 
 /*
 ATmega328P
@@ -26,3 +14,18 @@ Flash  256k bytes (of which 8k is used for the bootloader)
 SRAM   8k bytes
 EEPROM 4k byte
 */
+class Device {
+
+    public:
+
+      // Device();
+
+      int getFreeSRAM();
+
+      // int getFreeFlash();
+      
+      // int getFreeEEPROM();
+
+};
+
+#endif

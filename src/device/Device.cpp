@@ -1,5 +1,9 @@
 #include "Device.h"
 
+/*Device::Device() {
+  
+}*/
+
 int Device::getFreeSRAM() {
   #ifdef __arm__
   // should use uinstd.h to define sbrk but Due causes a conflict
