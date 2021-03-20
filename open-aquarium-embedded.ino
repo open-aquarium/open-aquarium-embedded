@@ -91,7 +91,6 @@ void displayData(float humidity, float temperature, float heatIndex, int light) 
   } else {
     display.println(F("OFF"));
   }
-//  display.println(light);
   
   display.display();
 }
@@ -122,6 +121,73 @@ const byte SDCARD_CS_PIN = 53;
 SDCard card(SDCARD_CS_PIN);
 /**SDCARD - END****************************************************************/
 
+/**RTC - BEGIN*****************************************************************/
+#include "RTClib.h"
+RTC_DS3231 rtc;
+void setupRTC() {
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    Serial.flush();
+    abort();
+  }
+  // CHANGE TO NTP sync
+  if (rtc.lostPower()) {
+    Serial.println("RTC lost power, let's set the time!");
+    // When time needs to be set on a new device, or after a power loss, the
+    // following line sets the RTC to the date & time this sketch was compiled
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    // This line sets the RTC with an explicit date & time, for example to set
+    // January 21, 2014 at 3am you would call:
+    // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
+  }
+}
+
+String nowAsISOString() {
+  DateTime date = rtc.now();
+  String result = F("");
+  
+  String month = F("");
+  month += date.month();
+  if(month.length() == 1) {
+    month = "0" + month;
+  }
+  String day = F("");
+  day += date.day();
+  if(day.length() == 1) {
+    day = "0" + day;
+  }
+  String hour = F("");
+  hour += date.hour();
+  if(hour.length() == 1) {
+    hour = "0" + hour;
+  }
+  String minute = F("");
+  minute += date.minute();
+  if(minute.length() == 1) {
+    minute = "0" + minute;
+  }
+  String second = F("");
+  second += date.second();
+  if(second.length() == 1) {
+    second = "0" + second;
+  }
+  
+  result += date.year();
+  result += F("-");
+  result += month;
+  result += F("-");
+  result += day;
+  result += F("T");
+  result += hour;
+  result += F(":");
+  result += minute;
+  result += F(":");
+  result += second;
+  result += F("Z");
+  return result;
+}
+/**RTC - END*******************************************************************/
+
 int statusLedState = LOW;
 float humidity = -32768.99;
 float temperature = -32768.99;
@@ -130,18 +196,22 @@ int light = -32768;
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial);
-
+//  while (!Serial);
+//  Serial.println("setup()");
   buzz.playBeep();
+
+  // setupNTP();
+  setupRTC();
 
   card.printLog(F("Open Aquarium"));
   card.printLog(F("setup()"));
+  card.printLog(nowAsISOString());
   
   setupDisplay();
   displayWelcomeMessage();
-//  delay(2000);
+  delay(2000);
   displayFusRoDah();
-//  delay(5000);
+  delay(5000);
   sleepDisplay();
   
   pinMode(LED_BUILTIN, OUTPUT);
@@ -166,6 +236,9 @@ void setup() {
 
   String volumeSize = F("Volume size: ");
   card.printLog(volumeSize + card.volumeSize());
+
+  card.printDebug(F("example"));
+  card.printError(F("example"));
 }
 
 void loop() {
@@ -184,7 +257,8 @@ void loop() {
   
   if(currentExecution - lastExecution >= 5000) {
     lastExecution = currentExecution;
-
+//    DateTime now = rtc.now();
+    
     // DHT
     humidity = dht.readHumidity();
     temperature = dht.readTemperature(); // Celsius
@@ -199,9 +273,13 @@ void loop() {
     // LDR
     light = digitalRead(LDRPIN);
 
-    String data = F("Humidity: ");
-    data += humidity;
-    data = F("Humidity: ");
+    
+    String data = F("");
+    data += F("Date: ");
+    data += nowAsISOString();
+    data += F(" RTC Temperature: ");
+    data += rtc.getTemperature();
+    data += F(" Humidity: ");
     data += humidity;
     data += F("%  Temperature: ");
     data += temperature;
@@ -215,7 +293,14 @@ void loop() {
     data += dev.getFreeSRAM();
     card.println(data);
 
-    Serial.print(F("Humidity: "));
+    Serial.print(F("Date: "));
+    Serial.print(nowAsISOString());
+
+    Serial.print(" RTC Temperature: ");
+    Serial.print(rtc.getTemperature());
+    Serial.print("°C ");
+    
+    Serial.print(F(" Humidity: "));
     Serial.print(humidity);
     Serial.print(F("%  Temperature: "));
     Serial.print(temperature);
@@ -231,12 +316,12 @@ void loop() {
 
   // Sleep?
   if(currentExecution - lastDisplay >= 5000) {
-    card.printDebug(F("sleep display"));
+//    card.printDebug(F("sleep display"));
     sleepDisplay();
   }
   // Display it?
-  if(currentExecution - lastDisplay >= 20000) {
-    card.printError(F("example display"));
+  if( (currentExecution - lastDisplay) >= 60000) {
+//    card.printError(F("example display"));
     lastDisplay = currentExecution;
     wakeDisplay();
     displayData(humidity, temperature, heatIndex, light);
