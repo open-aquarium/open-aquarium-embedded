@@ -7,7 +7,15 @@
   "device": {
     "serialNumber": "383c44a4-adf7-4831-a4f5-f4019087e8db",
     "softwareVersion": "1.0.0",
-    "hardwareVersion": "1.0.0"
+    "hardwareVersion": "1.0.0",
+    "secondary-memory": {
+      "cardType": "SD2",
+      "clusters": 478976,
+      "blocksPerCluster": 8,
+      "totalBlocks": 3831808,
+      "volumeType": "FAT32",
+      "volumeSize": 1915904
+    }
   },
   "deviceSample": {
     "freeMemory": 1,

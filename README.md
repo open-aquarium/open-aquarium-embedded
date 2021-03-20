@@ -36,6 +36,14 @@
 
 - https://learn.adafruit.com/photocells/overview
 
+
+### SD Card
+
+- https://randomnerdtutorials.com/guide-to-sd-card-module-with-arduino/
+- https://www.usinainfo.com.br/blog/projeto-arduino-sd-card-leitura-e-escrita-de-dados-no-cartao-micro-sd/
+- https://lastminuteengineers.com/arduino-micro-sd-card-module-tutorial/
+- https://blogmasterwalkershop.com.br/arduino/como-usar-com-arduino-modulo-leitor-de-micro-sd-card
+
 ## Release Workflow
 
 Recommended workflow

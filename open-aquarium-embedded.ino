@@ -116,6 +116,12 @@ Buzzer buzz(PASSIVE_BUZZER);
 Device dev;
 /**DEVICE - END****************************************************************/
 
+/**SDCARD - BEGIN**************************************************************/
+#include "src/sdCard/SDCard.h"
+const byte SDCARD_CS_PIN = 53;
+SDCard card(SDCARD_CS_PIN);
+/**SDCARD - END****************************************************************/
+
 int statusLedState = LOW;
 float humidity = -32768.99;
 float temperature = -32768.99;
@@ -124,7 +130,12 @@ int light = -32768;
 
 void setup() {
   Serial.begin(9600);
+  while (!Serial);
+
   buzz.playBeep();
+
+  card.printLog(F("Open Aquarium"));
+  card.printLog(F("setup()"));
   
   setupDisplay();
   displayWelcomeMessage();
@@ -140,6 +151,21 @@ void setup() {
 
   // LDR (photoresistor)
   pinMode(LDRPIN, INPUT);
+
+  String cardType = F("SD Card type: ");
+  card.printLog(cardType + card.cardType());
+
+  String volumeType = F("Volume type: ");
+  card.printLog(volumeType + card.volumeType());
+
+  String clusterCount = F("Cluster count: ");
+  card.printLog(clusterCount + card.clusterCount());
+
+  String blocksPerCluster = F("Blocks: ");
+  card.printLog(blocksPerCluster + card.blocksPerCluster());
+
+  String volumeSize = F("Volume size: ");
+  card.printLog(volumeSize + card.volumeSize());
 }
 
 void loop() {
@@ -158,7 +184,7 @@ void loop() {
   
   if(currentExecution - lastExecution >= 5000) {
     lastExecution = currentExecution;
-    
+
     // DHT
     humidity = dht.readHumidity();
     temperature = dht.readTemperature(); // Celsius
@@ -172,7 +198,23 @@ void loop() {
   
     // LDR
     light = digitalRead(LDRPIN);
-  
+
+    String data = F("Humidity: ");
+    data += humidity;
+    data = F("Humidity: ");
+    data += humidity;
+    data += F("%  Temperature: ");
+    data += temperature;
+    data += F("°C ");
+    data += F("  Heat index: ");
+    data += heatIndex;
+    data += F("°C ");
+    data += F("  Light: ");
+    data += light;
+    data += F("  SRAM: ");
+    data += dev.getFreeSRAM();
+    card.println(data);
+
     Serial.print(F("Humidity: "));
     Serial.print(humidity);
     Serial.print(F("%  Temperature: "));
@@ -189,10 +231,12 @@ void loop() {
 
   // Sleep?
   if(currentExecution - lastDisplay >= 5000) {
+    card.printDebug(F("sleep display"));
     sleepDisplay();
   }
   // Display it?
   if(currentExecution - lastDisplay >= 20000) {
+    card.printError(F("example display"));
     lastDisplay = currentExecution;
     wakeDisplay();
     displayData(humidity, temperature, heatIndex, light);
