@@ -1,0 +1,37 @@
+{
+  "header": {
+    "type": "PERIODIC",
+    "eventId": "383c44a4-adf7-4831-a4f5-f4019087e8db",
+    "triggerTime": "2020-11-29T03:48:31.218Z"
+  },
+  "device": {
+    "serialNumber": "383c44a4-adf7-4831-a4f5-f4019087e8db",
+    "softwareVersion": "1.0.0",
+    "hardwareVersion": "1.0.0",
+    "secondary-memory": {
+      "cardType": "SD2",
+      "clusters": 478976,
+      "blocksPerCluster": 8,
+      "totalBlocks": 3831808,
+      "volumeType": "FAT32",
+      "volumeSize": 1915904
+    }
+  },
+  "deviceSample": {
+    "freeMemory": 1,
+    "batteryPowered": false
+  },
+  "roomSample": {
+    "roomTemperature": 32.9,
+    "relativeHumidity": 40.2,
+    "atmosphericPressure": null,
+    "altitude": 100
+  },
+  "waterSample": {
+    "temperature": 28.1,
+    "totalDissolvedSolids": null,
+    "waterLevelHigh": true,
+    "waterLevelMedium": false,
+    "waterLevelLow": false
+  }
+}

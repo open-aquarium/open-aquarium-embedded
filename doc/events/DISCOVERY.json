@@ -1,0 +1,22 @@
+{
+  "header": {
+    "type": "DISCOVERY",
+    "eventId": "383c44a4-adf7-4831-a4f5-f4019087e8db",
+    "triggerTime": "2020-11-29T03:48:31.218Z"
+  },
+  "device": {
+    "serialNumber": "383c44a4-adf7-4831-a4f5-f4019087e8db",
+    "softwareVersion": "1.0.0",
+    "hardwareVersion": "abc"
+  },
+  "rollCallData": {
+    "sensors": [
+      {
+        "id": 1,
+        "sensor": "DHT22",
+        "address": "D2",
+        "category": "room"
+      }
+    ]
+  }
+}
