@@ -11,6 +11,9 @@ void OpenAquarium::setup() {
   
   this->setupActivityLed();
 
+  // Real Time Clock
+  this->realTimeClock.setup();
+
   // Environment Humidity and Temperature
   this->setupDHT();
   // Environment Light
@@ -19,9 +22,11 @@ void OpenAquarium::setup() {
   this->deviceReady();
 
   String version = F("");
-  version += F("Version ");
+  version += F("Date ");
+  version += this->realTimeClock.nowAsISOString();
+  version += F("  Version ");
   version += this->getVersion();
-  version += F(" BUILD ");
+  version += F("  BUILD ");
   version += this->getBuildVersion();
   this->log.info(version);
   this->sdcard.printDebug(version);
@@ -75,8 +80,10 @@ void OpenAquarium::discoveryEvent() {
   this->sdcard.printDebug(F("OpenAquarium::loop->discovery"));
 
   String data = F("DISCOVERY ");
+
+  data += this->realTimeClock.nowAsISOString();
   
-  data += F("SD Card type: ");
+  data += F("  SD Card type: ");
   data += this->sdcard.cardType();
 
   data += F("  SD Volume type: ");
@@ -102,6 +109,8 @@ void OpenAquarium::periodicEvent() {
 
   String data = F("PERIODIC  ");
 
+  data += this->realTimeClock.nowAsISOString();
+
   float humidity = this->ERROR_FLOAT_READING;
   float temperature = this->ERROR_FLOAT_READING;
   float heatIndex = this->ERROR_FLOAT_READING;
@@ -113,7 +122,7 @@ void OpenAquarium::periodicEvent() {
   }  
   heatIndex = dht.computeHeatIndex(temperature, humidity, false);
 
-  data += F("Humidity: ");
+  data += F("  Humidity: ");
   data += humidity;
   data += F("%");
   data += F("  Temperature: ");

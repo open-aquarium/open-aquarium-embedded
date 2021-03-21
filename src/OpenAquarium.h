@@ -9,6 +9,8 @@
 
 #include "sdCard/SDCard.h"
 
+#include "rtc/RealTimeClock.h"
+
 #include "DHT.h"
 
 #include <Arduino.h>
@@ -53,6 +55,9 @@ class OpenAquarium {
     // SD Card
     const uint8_t SDCARD_CS_PIN = 53;
     SDCard sdcard; //(SDCARD_CS_PIN);
+
+    // RTC
+    RealTimeClock realTimeClock;
 
     // SENSORS
     const float ERROR_FLOAT_READING = -32768.99;
