@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "~/.Applications/arduino-ide_1.8.13/hardware/arduino/avr/**",
+                "~/.Applications/arduino-ide_1.8.13/hardware/tools/avr/**",
+                "~/.Applications/arduino-ide_1.8.13/libraries/**",
+                "~/.arduino15/staging/libraries/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}
