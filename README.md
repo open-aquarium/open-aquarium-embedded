@@ -44,6 +44,12 @@
 - https://lastminuteengineers.com/arduino-micro-sd-card-module-tutorial/
 - https://blogmasterwalkershop.com.br/arduino/como-usar-com-arduino-modulo-leitor-de-micro-sd-card
 
+# Real Time Clock (RTC)
+
+- https://create.arduino.cc/projecthub/MisterBotBreak/how-to-use-a-real-time-clock-module-ds3231-bc90fe
+- https://learn.adafruit.com/adafruit-ds3231-precision-rtc-breakout/arduino-usage
+- https://learn.adafruit.com/adafruit-pcf8523-real-time-clock/rtc-with-arduino
+
 ## Release Workflow
 
 Recommended workflow
