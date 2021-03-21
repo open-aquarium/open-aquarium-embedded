@@ -11,6 +11,8 @@
 
 #include "rtc/RealTimeClock.h"
 
+#include "display/Display.h"
+
 #include "DHT.h"
 
 #include <Arduino.h>
@@ -58,6 +60,9 @@ class OpenAquarium {
 
     // RTC
     RealTimeClock realTimeClock;
+
+    // Display OLED
+    Display display;
 
     // SENSORS
     const float ERROR_FLOAT_READING = -32768.99;

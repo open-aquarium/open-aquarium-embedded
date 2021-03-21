@@ -2,11 +2,14 @@
 
 ## Dependencies
 
-| Equipment | Lib                                                                           | Version | PIN | Notes |
-|-----------|-------------------------------------------------------------------------------|---------|-----|-------|
-| DHT22     | [adafruit/DHT-sensor-library](https://github.com/adafruit/DHT-sensor-library) | 1.4.2   | 2   |       |
-|           | [ArduinoJson](https://arduinojson.org)                                        | 6.17.3  |     |       |
-|           | [SD Lib](https://www.arduino.cc/en/Reference/SD)                              | 1.2.4   |     |       |
+| Equipment    | Lib                                                                           | Version | PIN | Notes |
+|--------------|-------------------------------------------------------------------------------|---------|-----|-------|
+| DHT22        | [adafruit/DHT-sensor-library](https://github.com/adafruit/DHT-sensor-library) | 1.4.2   | 2   |       |
+|              | [ArduinoJson](https://arduinojson.org)                                        | 6.17.3  |     |       |
+|              | [SD Lib](https://www.arduino.cc/en/Reference/SD)                              | 1.2.4   |     |       |
+| DS3231       | [RTClib](https://github.com/adafruit/RTClib)                                  | 1.12.5  |     |       |
+| OLED Display | [Adafruit-GFX-Library](https://github.com/adafruit/Adafruit-GFX-Library)      | 1.10.6  |     |       |
+| OLED Display | [Adafruit_SSD1306](https://github.com/adafruit/Adafruit_SSD1306)              | 2.4.3   |     |       |
 
 ## Examples
 

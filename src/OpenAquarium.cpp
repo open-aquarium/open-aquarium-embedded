@@ -14,10 +14,19 @@ void OpenAquarium::setup() {
   // Real Time Clock
   this->realTimeClock.setup();
 
+  // Display
+  this->display.setup();
+
   // Environment Humidity and Temperature
   this->setupDHT();
   // Environment Light
   this->setupLDR();
+
+  this->display.displayWelcomeMessage();
+  delay(3000);
+  this->display.displayFusRoDah();
+  delay(1000);
+  this->display.sleepDisplay();
 
   this->deviceReady();
 
