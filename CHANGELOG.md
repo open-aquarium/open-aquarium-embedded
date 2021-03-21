@@ -1,3 +1,13 @@
+# [0.2.0](https://github.com/open-aquarium/open-aquarium-embedded/compare/v0.1.0...v0.2.0) (2021-03-21)
+
+
+### Features
+
+* **device:** add real time clock ([#11](https://github.com/open-aquarium/open-aquarium-embedded/issues/11)) ([5f1f7ec](https://github.com/open-aquarium/open-aquarium-embedded/commit/5f1f7ec284fb9527972dc6e3557ab54fe9542e2b)), closes [open-aquarium/open-aquarium#28](https://github.com/open-aquarium/open-aquarium/issues/28)
+* **device:** write data into a sdcard ([4d7fe0e](https://github.com/open-aquarium/open-aquarium-embedded/commit/4d7fe0e050c5f402c18a9c2cdd8cbd8269d92638))
+
+
+
 # [0.1.0](https://github.com/open-aquarium/open-aquarium-embedded/compare/v0.0.0...v0.1.0) (2021-03-15)
 
 
