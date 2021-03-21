@@ -23,7 +23,6 @@ class Display {
     const uint8_t OLED_DC_PIN = 25; // ?
     const uint8_t OLED_CS_PIN = 26; // ?
 
-    //Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
     Adafruit_SSD1306 display;
   public:
     Display() :
