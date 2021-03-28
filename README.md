@@ -65,6 +65,10 @@
 
 * [Barometric Pressure, Temperature and Altitude](https://www.arduinoecia.com.br/bmp280-pressao-temperatura-altitude/)
 
+### Sound Sensor
+
+- [Sound Module](https://pt.aliexpress.com/item/32530266337.html?spm=a2g0o.detail.0.0.6c603fd2kr8CLq&gps-id=pcDetailBottomMoreThisSeller&scm=1007.13339.169870.0&scm_id=1007.13339.169870.0&scm-url=1007.13339.169870.0&pvid=20c5b25b-54bc-4fd5-96ca-1a44b0beb038&_t=gps-id:pcDetailBottomMoreThisSeller,scm-url:1007.13339.169870.0,pvid:20c5b25b-54bc-4fd5-96ca-1a44b0beb038,tpp_buckets:668%230%23131923%2367_668%230%23131923%2367_668%23888%233325%2313_668%23888%233325%2313_668%232846%238111%231996_668%232717%237566%23838_668%231000022185%231000066058%230_668%233468%2315615%23686_668%232846%238111%231996_668%232717%237566%23838_668%233164%239976%23243_668%233468%2315615%23686)
+
 ### Other
 
 * https://en.cppreference.com/w/cpp/types/integer

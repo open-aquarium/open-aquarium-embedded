@@ -76,6 +76,11 @@ class OpenAquarium {
     const uint8_t LDR_PIN = 3;
     void setupLDR();
     int readLDRSensor();
+
+    // SOUND
+    const uint8_t SOUND_SENSOR_PIN = 4;
+    void setupSoundSensor();
+    int readSoundSensor();
   
   public:
     OpenAquarium() :

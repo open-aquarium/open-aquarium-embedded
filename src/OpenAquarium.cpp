@@ -21,6 +21,8 @@ void OpenAquarium::setup() {
   this->setupDHT();
   // Environment Light
   this->setupLDR();
+  // Environment Sound
+  this->setupSoundSensor();
 
   this->display.displayWelcomeMessage();
   delay(3000);
@@ -144,6 +146,8 @@ void OpenAquarium::periodicEvent() {
   data += this->readLDRSensor();
   data += F(" Free SRAM: ");
   data += this->device.getFreeSRAM();
+  data += F("  Sound: "); // TODO
+  data += readSoundSensor();
 
   this->log.info(data);
   this->sdcard.println(data);
@@ -187,4 +191,15 @@ void OpenAquarium::setupLDR() {
 
 int OpenAquarium::readLDRSensor() {
   return digitalRead(this->LDR_PIN);
+}
+
+void OpenAquarium::setupSoundSensor() {
+  // TODO replace with a better sensor
+  pinMode(this->SOUND_SENSOR_PIN, INPUT);
+}
+
+int OpenAquarium::readSoundSensor() {
+  // environment sound intensity > threshold = LOW
+  // environment sound intensity < threshold = HIGH
+  return digitalRead(this->SOUND_SENSOR_PIN);
 }
