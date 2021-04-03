@@ -10,6 +10,7 @@
 | DS3231       | [RTClib](https://github.com/adafruit/RTClib)                                  | 1.12.5  |     |       |
 | OLED Display | [Adafruit-GFX-Library](https://github.com/adafruit/Adafruit-GFX-Library)      | 1.10.6  |     |       |
 | OLED Display | [Adafruit_SSD1306](https://github.com/adafruit/Adafruit_SSD1306)              | 2.4.3   |     |       |
+| BMP280       | [Adafruit BMP280](https://github.com/adafruit/Adafruit_BMP280_Library)        | 2.1.1   |     |       |
 
 ## Examples
 
@@ -25,6 +26,10 @@
 - [Adafruit parts (DHT22)](https://github.com/adafruit/Fritzing-Library/blob/master/AdaFruit.fzbz)
 
 ## References
+
+### I2C Protocol
+
+- [Beginning with Arduino and I2c Protocol (pt_BR)](https://cadernodelaboratorio.com.br/iniciando-com-o-arduino-o-protocolo-i2c/)
 
 ### Led
 

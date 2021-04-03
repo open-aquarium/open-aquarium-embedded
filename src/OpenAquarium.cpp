@@ -23,6 +23,8 @@ void OpenAquarium::setup() {
   this->setupLDR();
   // Environment Sound
   this->setupSoundSensor();
+  // Environment BMP
+  this->setupBMP();
 
   this->display.displayWelcomeMessage();
   delay(3000);
@@ -149,6 +151,16 @@ void OpenAquarium::periodicEvent() {
   data += F("  Sound: "); // TODO
   data += readSoundSensor();
 
+  // BMP
+  data += F("  BMP-Temperature: ");
+  data += this->bmp.readTemperature();
+  data += F("  Pressure: ");
+  data += this->bmp.readPressure();
+  data += F(" Pa");
+  data += F("  Altitude: ");
+  data += this->bmp.readAltitude(1013.25);
+  data += F(" m");
+
   this->log.info(data);
   this->sdcard.println(data);
 }
@@ -202,4 +214,16 @@ int OpenAquarium::readSoundSensor() {
   // environment sound intensity > threshold = LOW
   // environment sound intensity < threshold = HIGH
   return digitalRead(this->SOUND_SENSOR_PIN);
+}
+
+void OpenAquarium::setupBMP() {
+  if (!this->bmp.begin()) {
+    this->reportError(F("BMP sensor not found"));
+  }
+  /* Default settings from datasheet. */
+  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+                  Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+                  Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+                  Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+                  Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
 }

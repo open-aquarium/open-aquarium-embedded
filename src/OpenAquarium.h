@@ -15,6 +15,8 @@
 
 #include "DHT.h"
 
+#include <Adafruit_BMP280.h>
+
 #include <Arduino.h>
 
 class OpenAquarium {
@@ -81,6 +83,10 @@ class OpenAquarium {
     const uint8_t SOUND_SENSOR_PIN = 4;
     void setupSoundSensor();
     int readSoundSensor();
+
+    // BMP280
+    Adafruit_BMP280 bmp;
+    void setupBMP();
   
   public:
     OpenAquarium() :
