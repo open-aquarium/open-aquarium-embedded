@@ -4,13 +4,36 @@
 
 | Equipment    | Lib                                                                           | Version | PIN | Notes |
 |--------------|-------------------------------------------------------------------------------|---------|-----|-------|
-| DHT22        | [adafruit/DHT-sensor-library](https://github.com/adafruit/DHT-sensor-library) | 1.4.2   | 2   |       |
+| DHT22        | [adafruit/DHT-sensor-library](https://github.com/adafruit/DHT-sensor-library) | 1.4.2   |     |       |
 |              | [ArduinoJson](https://arduinojson.org)                                        | 6.17.3  |     |       |
 |              | [SD Lib](https://www.arduino.cc/en/Reference/SD)                              | 1.2.4   |     |       |
 | DS3231       | [RTClib](https://github.com/adafruit/RTClib)                                  | 1.12.5  |     |       |
 | OLED Display | [Adafruit-GFX-Library](https://github.com/adafruit/Adafruit-GFX-Library)      | 1.10.6  |     |       |
 | OLED Display | [Adafruit_SSD1306](https://github.com/adafruit/Adafruit_SSD1306)              | 2.4.3   |     |       |
 | BMP280       | [Adafruit BMP280](https://github.com/adafruit/Adafruit_BMP280_Library)        | 2.1.1   |     |       |
+
+## Data Types
+
+| Block           | Field                  | Type     | Min | Max | Unit    | Notes                            |
+|-----------------|------------------------|----------|-----|-----|---------|----------------------------------|
+| header          | type                   | String   |     |     |         | Event type                       |
+| header          | eventId                | String   |     |     |         | Event unique universal ID (UUID) |
+| header          | triggerTime            | String   |     |     |         | Date/Time when the event occured |
+| device          | serialNumber           | String   |     |     |         | Hardware serial number           |
+| device          | softwareVersion        | String   |     |     |         | Software version                 |
+| device          | hardwareVersion        | String   |     |     |         | Hardware version                 |
+| rollCall.sensor | id                     | int      |     |     |         | Sequential number                |
+| rollCall.sensor | sensor                 | String   |     |     |         | Sensor name                      |
+| rollCall.sensor | address                | String   |     |     |         | Sensor address, pin              |
+| rollCall.sensor | category               | String   |     |     |         | Sensor category                  |
+| deviceSample    | freeMemory             | uint8_t  |     |     | Byte    | Free SRAM memory                 |
+| deviceSample    | sdCardType             | String   |     |     |         | SD, SD2                          |
+| deviceSample    | sdCardVolumeType       | String   |     |     |         | FAT, FAT32                       |
+| deviceSample    | sdCardVolumeSize       | uint32_t |     |     | Byte    | MicroSD Volume size              |
+| deviceSample    | sdCardClusterCount     | uint32_t |     |     | Unit    | Number of clusters               |
+| deviceSample    | sdCardBlocksPerCluster | uint8_t  |     |     | Unit    | Number of blocks per cluster     |
+| deviceSample    | sdCardTotalBlocks      | uint32_t |     |     | Unit    | Total number of blocks           |
+| deviceSample    | temperature            | float    |     |     | Celcius | Device internal temperature      |
 
 ## Examples
 
