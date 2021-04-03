@@ -91,6 +91,8 @@ void OpenAquarium::reportError(String message) {
 void OpenAquarium::discoveryEvent() {
   // this->log.info(F("OpenAquarium::loop->discovery"));
   this->sdcard.printDebug(F("OpenAquarium::loop->discovery"));
+  DiscoveryEvent discoveryEvent;
+  discoveryEvent = this->buildDiscovery();
 
   String data = F("DISCOVERY ");
 
@@ -119,6 +121,8 @@ void OpenAquarium::periodicEvent() {
   // Add to debug log
   // this->log.info(F("OpenAquarium::loop->periodic"));
   this->sdcard.printDebug(F("OpenAquarium::loop->periodic"));
+  PeriodicEvent periodicEvent;
+  periodicEvent = this->buildPeriodic();
 
   String data = F("PERIODIC  ");
 
@@ -226,4 +230,86 @@ void OpenAquarium::setupBMP() {
                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
                   Adafruit_BMP280::FILTER_X16,      /* Filtering. */
                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+}
+
+DiscoveryEvent OpenAquarium::buildDiscovery() {
+  Serial.println("OpenAquarium::buildDiscovery()");
+  DiscoveryEvent discovery1;
+  discovery1.header = this->buildHeaderBlock();
+  discovery1.device = this->buildDeviceBlock();
+  discovery1.rollCallData = this->buildRollCallDataBlock();
+  return discovery1;
+}
+
+PeriodicEvent OpenAquarium::buildPeriodic() {
+  Serial.println("OpenAquarium::buildPeriodic()");
+  PeriodicEvent periodic1;
+  periodic1.header = this->buildHeaderBlock();
+  periodic1.device = this->buildDeviceBlock();
+  periodic1.deviceSample = this->buildDeviceSampleBlock();
+  periodic1.environmentSample = this->buildEnvironmentSampleBlock();
+  periodic1.waterSample = this->buildWaterSampleBlock();
+  return periodic1;
+}
+
+HeaderBlock OpenAquarium::buildHeaderBlock() {
+  Serial.println("OpenAquarium::buildHeaderBlock()");
+  HeaderBlock header1;
+  header1.type = "PERIODIC/DISCOVERY";
+  header1.eventId = "383c44a4-adf7-4831-a4f5-f4019087e8db";
+  header1.triggerTime = "2020-11-29T03:48:31.218Z";
+  return header1;
+}
+
+DeviceBlock OpenAquarium::buildDeviceBlock() {
+  Serial.println("OpenAquarium::buildDeviceBlock()");
+  DeviceBlock device1;
+  device1.serialNumber = "A123";
+  device1.softwareVersion = "1.0.0";
+  device1.hardwareVersion = "1.1.0";
+  return device1;
+}
+
+RollCallDataBlock OpenAquarium::buildRollCallDataBlock() {
+  Serial.println("OpenAquarium::buildRollCallData()");
+
+  RollCallSensor rollCallSensor1;
+  rollCallSensor1.id = 20000014;
+  rollCallSensor1.sensor = "ESP";
+  rollCallSensor1.address = "D1";
+  rollCallSensor1.category = "environment";
+
+  RollCallDataBlock rollCallData1;
+  rollCallData1.sensors[0] = rollCallSensor1;
+
+  return rollCallData1;
+}
+
+DeviceSampleBlock OpenAquarium::buildDeviceSampleBlock() {
+  Serial.println("OpenAquarium::buildDeviceSampleBlock();");
+  DeviceSampleBlock deviceSample1;
+  deviceSample1.freeMemory = 127;
+  return deviceSample1;
+}
+
+EnvironmentSampleBlock OpenAquarium::buildEnvironmentSampleBlock() {
+  Serial.println("OpenAquarium::buildEnvironmentSampleBlock();");
+  EnvironmentSampleBlock environmentSample1;
+  environmentSample1.roomTemperature = 28;
+  environmentSample1.relativeHumidity = 80;
+  environmentSample1.atmosphericPressure = 67;
+  environmentSample1.altitude = 140;
+  return environmentSample1;
+}
+
+WaterSampleBlock OpenAquarium::buildWaterSampleBlock() {
+  Serial.println("OpenAquarium::buildWaterSampleBlock()");
+  WaterSampleBlock waterSample1;
+  waterSample1.temperature1 = 24.5;
+  waterSample1.temperature2 = 25;
+  waterSample1.totalDissolvedSolids = 250.1;
+  waterSample1.waterLevelLow = false;
+  waterSample1.waterLevelMedium = false;
+  waterSample1.waterLevelHigh = true;
+  return waterSample1;
 }

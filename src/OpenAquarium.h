@@ -17,6 +17,18 @@
 
 #include <Adafruit_BMP280.h>
 
+//#include "events/EventBuilder.h"
+
+#include "events/Discovery.h"
+#include "events/Periodic.h"
+#include "events/blocks/HeaderBlock.h"
+#include "events/blocks/DeviceBlock.h"
+#include "events/blocks/RollCallDataBlock.h"
+#include "events/blocks/RollCallSensor.h"
+#include "events/blocks/DeviceSampleBlock.h"
+#include "events/blocks/EnvironmentSampleBlock.h"
+#include "events/blocks/WaterSampleBlock.h"
+
 #include <Arduino.h>
 
 class OpenAquarium {
@@ -87,6 +99,16 @@ class OpenAquarium {
     // BMP280
     Adafruit_BMP280 bmp;
     void setupBMP();
+
+    // BUILDER - TODO move to a new builder class
+    HeaderBlock buildHeaderBlock();
+    DeviceBlock buildDeviceBlock();
+    RollCallDataBlock buildRollCallDataBlock();
+    DeviceSampleBlock buildDeviceSampleBlock();
+    EnvironmentSampleBlock buildEnvironmentSampleBlock();
+    WaterSampleBlock buildWaterSampleBlock();
+    DiscoveryEvent buildDiscovery();
+    PeriodicEvent buildPeriodic();
   
   public:
     OpenAquarium() :
