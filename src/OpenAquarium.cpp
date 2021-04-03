@@ -97,60 +97,14 @@ void OpenAquarium::discoveryEvent() {
 }
 
 void OpenAquarium::periodicEvent() {
-  // Add to debug log
-  this->sdcard.printDebug(F("OpenAquarium::loop->periodic"));
   this->log.debug(F("OpenAquarium::loop->periodic"));
+  this->sdcard.printDebug(F("OpenAquarium::loop->periodic"));
   PeriodicEvent periodicEvent;
   periodicEvent = this->buildPeriodic();
   
   String json = EventBuilder::periodicToJSON(periodicEvent); 
-  this->log.debug(F("OpenAquarium::this->periodicToJSON(periodicEvent)"));
   this->log.info(json);
   this->sdcard.println(json);
-
-  String data = F("PERIODIC  ");
-
-  data += this->realTimeClock.nowAsISOString();
-
-  float humidity = OA_MIN_FLOAT;
-  float temperature = OA_MIN_FLOAT;
-  float heatIndex = OA_MIN_FLOAT;
-  humidity = dht.readHumidity();
-  temperature = dht.readTemperature(); // Celsius
-  /*if (isnan(humidity) || isnan(temperature)) {
-    this->reportError(F("Failed to read from DHT sensor!"));
-    return;
-  }  */
-  heatIndex = dht.computeHeatIndex(temperature, humidity, false);
-
-  data += F("  Humidity: ");
-  data += humidity;
-  data += F("%");
-  data += F("  Temperature: ");
-  data += temperature;
-  data += F("°C");
-  data += F("  Heat Index: ");
-  data += heatIndex;
-  data += F("°C");
-  data += F("  Light: ");
-  data += this->readLDRSensor();
-  data += F(" Free SRAM: ");
-  data += this->device.getFreeSRAM();
-  data += F("  Sound: "); // TODO
-  data += readSoundSensor();
-
-  // BMP
-  data += F("  BMP-Temperature: ");
-  data += this->bmp.readTemperature();
-  data += F("  Pressure: ");
-  data += this->bmp.readPressure();
-  data += F(" Pa");
-  data += F("  Altitude: ");
-  data += this->bmp.readAltitude(1013.25);
-  data += F(" m");
-
-  this->log.info(data);
-  this->sdcard.println(data);
 }
 
 void OpenAquarium::setupActivityLed() {
@@ -295,7 +249,7 @@ DeviceSampleBlock OpenAquarium::buildDeviceSampleBlock() {
   deviceSample1.sdCardVolumeSize = this->sdcard.volumeSize();
 
   deviceSample1.temperature = this->device.getDeviceInbuiltTemperature();
-
+  
   return deviceSample1;
 }
 
@@ -303,10 +257,11 @@ EnvironmentSampleBlock OpenAquarium::buildEnvironmentSampleBlock() {
   this->log.debug(F("OpenAquarium::buildEnvironmentSampleBlock();"));
   EnvironmentSampleBlock environmentSample1;
   environmentSample1.roomTemperature = dht.readTemperature();
+  environmentSample1.roomTemperature2 = bmp.readTemperature();
   environmentSample1.relativeHumidity = dht.readHumidity();
   environmentSample1.heatIndex = OA_MIN_FLOAT;
-  environmentSample1.atmosphericPressure = OA_MIN_FLOAT;
-  environmentSample1.altitude = OA_MIN_FLOAT;
+  environmentSample1.atmosphericPressure = this->bmp.readPressure();
+  environmentSample1.altitude = this->bmp.readAltitude(1013.25);
 
   if (isnan(environmentSample1.relativeHumidity) || isnan(environmentSample1.roomTemperature)) {
     this->log.error(F("Failed to read from DHT sensor!"));
@@ -316,7 +271,12 @@ EnvironmentSampleBlock OpenAquarium::buildEnvironmentSampleBlock() {
       environmentSample1.relativeHumidity, 
       false
     );
-  }  
+  }
+
+  // TODO change the sensors
+  environmentSample1.lightIntensity = this->readLDRSensor();
+  environmentSample1.noiseLevel = this->readSoundSensor();
+
   return environmentSample1;
 }
 
