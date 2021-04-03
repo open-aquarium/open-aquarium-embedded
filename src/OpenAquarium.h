@@ -19,6 +19,7 @@
 
 //#include "events/EventBuilder.h"
 
+#include "events/EventBuilder.h"
 #include "events/Discovery.h"
 #include "events/Periodic.h"
 #include "events/blocks/HeaderBlock.h"
@@ -101,7 +102,7 @@ class OpenAquarium {
     void setupBMP();
 
     // BUILDER - TODO move to a new builder class
-    HeaderBlock buildHeaderBlock();
+    HeaderBlock buildHeaderBlock(int eventType);
     DeviceBlock buildDeviceBlock();
     RollCallDataBlock buildRollCallDataBlock();
     DeviceSampleBlock buildDeviceSampleBlock();

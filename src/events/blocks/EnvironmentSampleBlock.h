@@ -4,6 +4,7 @@
 typedef struct {
   float roomTemperature;
   float relativeHumidity;
+  float heatIndex;
   float atmosphericPressure;
   float altitude;
 } EnvironmentSampleBlock;
