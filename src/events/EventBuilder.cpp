@@ -133,7 +133,24 @@ static String EventBuilder::deviceSampleBlockToJSON(DeviceSampleBlock deviceSamp
   json += F("\"deviceSample\": {");
   json += F("\"freeMemory\": ");
   json += deviceSample.freeMemory;
+  json += F(",");
+
+  json += F("\"sdCardType\": \"");
+  json += deviceSample.sdCardType;
+  json += F("\",");
+  json += F("\"sdCardVolumeType\": \"");
+  json += deviceSample.sdCardVolumeType;
+  json += F("\",");
+  json += F("\"sdCardClusterCount\": ");
+  json += deviceSample.sdCardClusterCount;
+  json += F(",");
+  json += F("\"sdCardBlocksPerCluster\": ");
+  json += deviceSample.sdCardBlocksPerCluster;
+  json += F(",");
+  json += F("\"sdCardVolumeSize\": ");
+  json += deviceSample.sdCardVolumeSize;
   // json += F(",");
+  
   json += F("},");
   return json;
 }
@@ -173,13 +190,13 @@ static String EventBuilder::waterSampleBlockToJSON(WaterSampleBlock waterSample)
   json += waterSample.totalDissolvedSolids;
   json += F(",");
   json += F("\"waterLevelLow\": ");
-  json += waterSample.waterLevelLow;
+  json += waterSample.waterLevelLow == true ? F("true") : F("false");
   json += F(",");
   json += F("\"waterLevelMedium\": ");
-  json += waterSample.waterLevelMedium;
+  json += waterSample.waterLevelMedium == true ? F("true") : F("false");
   json += F(",");
   json += F("\"waterLevelHigh\": ");
-  json += waterSample.waterLevelHigh;
+  json += waterSample.waterLevelHigh == true ? F("true") : F("false");
   // json += F(",");
   json += F("}");
   return json;

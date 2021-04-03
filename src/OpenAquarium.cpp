@@ -43,8 +43,6 @@ void OpenAquarium::setup() {
   version += this->getBuildVersion();
   this->log.info(version);
   this->sdcard.printDebug(version);
-
-  // this->reportError(F("ERROR: debug"));
 }
 
 void OpenAquarium::loop() {
@@ -85,7 +83,6 @@ void OpenAquarium::reportError(String message) {
   this->log.error(message);
   this->sdcard.printError(message);
   this->error = true;
-  // set error led
 }
 
 void OpenAquarium::discoveryEvent() {
@@ -246,6 +243,7 @@ DiscoveryEvent OpenAquarium::buildDiscovery() {
   discovery1.header = this->buildHeaderBlock(1);
   discovery1.device = this->buildDeviceBlock();
   discovery1.rollCallData = this->buildRollCallDataBlock();
+  
   return discovery1;
 }
 
@@ -310,6 +308,13 @@ DeviceSampleBlock OpenAquarium::buildDeviceSampleBlock() {
   // Serial.println("OpenAquarium::buildDeviceSampleBlock();");
   DeviceSampleBlock deviceSample1;
   deviceSample1.freeMemory = this->device.getFreeSRAM();
+
+  deviceSample1.sdCardType = this->sdcard.cardType();
+  deviceSample1.sdCardVolumeType = this->sdcard.volumeType();
+  deviceSample1.sdCardClusterCount = this->sdcard.clusterCount();
+  deviceSample1.sdCardBlocksPerCluster = this->sdcard.blocksPerCluster();
+  deviceSample1.sdCardVolumeSize = this->sdcard.volumeSize();
+
   return deviceSample1;
 }
 
@@ -319,8 +324,8 @@ EnvironmentSampleBlock OpenAquarium::buildEnvironmentSampleBlock() {
   environmentSample1.roomTemperature = dht.readTemperature();
   environmentSample1.relativeHumidity = dht.readHumidity();
   environmentSample1.heatIndex = this->ERROR_FLOAT_READING;
-  environmentSample1.atmosphericPressure = 67;
-  environmentSample1.altitude = 140;
+  environmentSample1.atmosphericPressure = this->ERROR_FLOAT_READING;;
+  environmentSample1.altitude = this->ERROR_FLOAT_READING;;
 
   if (!isnan(environmentSample1.relativeHumidity) && !isnan(environmentSample1.roomTemperature)) {
     // this->reportError(F("Failed to read from DHT sensor!"));
@@ -338,11 +343,11 @@ EnvironmentSampleBlock OpenAquarium::buildEnvironmentSampleBlock() {
 WaterSampleBlock OpenAquarium::buildWaterSampleBlock() {
   // Serial.println("OpenAquarium::buildWaterSampleBlock()");
   WaterSampleBlock waterSample1;
-  waterSample1.temperature1 = 24.5;
-  waterSample1.temperature2 = 25;
-  waterSample1.totalDissolvedSolids = 250.1;
-  waterSample1.waterLevelLow = false;
-  waterSample1.waterLevelMedium = false;
+  waterSample1.temperature1 = this->ERROR_FLOAT_READING;;
+  waterSample1.temperature2 = this->ERROR_FLOAT_READING;;
+  waterSample1.totalDissolvedSolids = this->ERROR_FLOAT_READING;;
+  waterSample1.waterLevelLow = true;
+  waterSample1.waterLevelMedium = true;
   waterSample1.waterLevelHigh = true;
   return waterSample1;
 }
