@@ -1,6 +1,8 @@
 #ifndef OA_OPEN_AQUARIUM_H
 #define OA_OPEN_AQUARIUM_H
 
+#include "util/limits.h"
+
 #include "log/Log.h"
 
 #include "buzzer/Buzzer.h"
@@ -80,8 +82,7 @@ class OpenAquarium {
     Display display;
 
     // SENSORS
-    const float ERROR_FLOAT_READING = -32768.99;
-
+    
     // DHT
     const uint8_t DHT22_PIN = 2;
     DHT dht;

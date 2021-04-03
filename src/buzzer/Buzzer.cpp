@@ -9,7 +9,7 @@ Buzzer::Buzzer(int8_t pin) {
 }
 
 void Buzzer::play(int melody[], size_t melodySize, int tempo) {
-  // Serial.println("Buzzer::play()");
+  // Serial.println(F("Buzzer::play()"));
   // sizeof gives the number of bytes, each int value is composed of two bytes (16 bits)
   // there are two values per note (pitch and duration), so for each note there are four bytes
   int notes = melodySize / 2;
@@ -39,7 +39,7 @@ void Buzzer::play(int melody[], size_t melodySize, int tempo) {
 }
 
 void Buzzer::playBeep() {
-  // Serial.println("Buzzer::playBeep()");
+  // Serial.println(F("Buzzer::playBeep()"));
   // notes of the moledy followed by the duration.
   // a 4 means a quarter note, 8 an eighteenth , 16 sixteenth, so on
   // !!negative numbers are used to represent dotted notes,

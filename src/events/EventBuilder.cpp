@@ -1,6 +1,6 @@
 #include "EventBuilder.h"
 
-void EventBuilder::buildDiscovery() {
+/*void EventBuilder::buildDiscovery() {
   Serial.println("EventBuilder::buildDiscovery()");
 }
 
@@ -30,11 +30,10 @@ void EventBuilder::buildEnvironmentSampleBlock() {
 
 void EventBuilder::buildWaterSampleBlock() {
   Serial.println("EventBuilder::buildWaterSampleBlock()");
-}
+}*/
 
 static String EventBuilder::discoveryToJSON(DiscoveryEvent discoveryEvent) {
-  // Serial.println("EventBuilder::discoveryToJSON()");
-  // return "{ discovery: 123}";
+  // Serial.println(F("EventBuilder::discoveryToJSON()"));
   String json = F("");
   json += F("{");
   json += EventBuilder::headerBlockToJSON(discoveryEvent.header);
@@ -45,8 +44,7 @@ static String EventBuilder::discoveryToJSON(DiscoveryEvent discoveryEvent) {
 }
 
 static String EventBuilder::periodicToJSON(PeriodicEvent periodicEvent) {
-  // Serial.println("EventBuilder::periodicToJSON()");
-  // return "{ periodic: 456}";
+  // Serial.println(F("EventBuilder::periodicToJSON()"));
   String json = F("");
   json += F("{");
   json += EventBuilder::headerBlockToJSON(periodicEvent.header);
@@ -59,6 +57,7 @@ static String EventBuilder::periodicToJSON(PeriodicEvent periodicEvent) {
 }
 
 static String EventBuilder::headerBlockToJSON(HeaderBlock header) {
+  // Serial.println(F("EventBuilder::headerBlockToJSON()"));
   String json = F("");
   json += F("\"header\": {");
   json += F("\"type\": \"");
@@ -75,6 +74,7 @@ static String EventBuilder::headerBlockToJSON(HeaderBlock header) {
 }
 
 static String EventBuilder::deviceBlockToJSON(DeviceBlock device) {
+  // Serial.println(F("EventBuilder::deviceBlockToJSON()"));
   String json = F("");
   json += F("\"device\": {");
   json += F("\"serialNumber\": \"");
@@ -91,6 +91,7 @@ static String EventBuilder::deviceBlockToJSON(DeviceBlock device) {
 }
 
 static String EventBuilder::rollCallDataBlockToJSON(RollCallDataBlock rollCallData) {
+  // Serial.println(F("EventBuilder::rollCallDataBlockToJSON()"));
   String json = F("");
   json += F("\"rollCallData\": {");
   json += F("\"sensors\": [");
@@ -129,10 +130,12 @@ static String EventBuilder::rollCallDataBlockToJSON(RollCallDataBlock rollCallDa
 }
 
 static String EventBuilder::deviceSampleBlockToJSON(DeviceSampleBlock deviceSample) {
+  // Serial.println(F("EventBuilder::deviceSampleBlockToJSON()"));
   String json = F("");
   json += F("\"deviceSample\": {");
   json += F("\"freeMemory\": ");
-  json += deviceSample.freeMemory;
+  // json += deviceSample.freeMemory;
+  json += deviceSample.freeMemory == OA_MIN_FLOAT ? F("null") : Converter::toString(deviceSample.freeMemory);
   json += F(",");
 
   json += F("\"sdCardType\": \"");
@@ -142,13 +145,20 @@ static String EventBuilder::deviceSampleBlockToJSON(DeviceSampleBlock deviceSamp
   json += deviceSample.sdCardVolumeType;
   json += F("\",");
   json += F("\"sdCardClusterCount\": ");
-  json += deviceSample.sdCardClusterCount;
+  // json += deviceSample.sdCardClusterCount;
+  json += deviceSample.sdCardClusterCount == OA_MIN_FLOAT ? F("null") : Converter::toString(deviceSample.sdCardClusterCount);
   json += F(",");
   json += F("\"sdCardBlocksPerCluster\": ");
-  json += deviceSample.sdCardBlocksPerCluster;
+  // json += deviceSample.sdCardBlocksPerCluster;
+  json += deviceSample.sdCardBlocksPerCluster == OA_MIN_FLOAT ? F("null") : Converter::toString(deviceSample.sdCardBlocksPerCluster);
   json += F(",");
   json += F("\"sdCardVolumeSize\": ");
-  json += deviceSample.sdCardVolumeSize;
+  // json += deviceSample.sdCardVolumeSize;
+  json += deviceSample.sdCardVolumeSize == OA_MIN_FLOAT ? F("null") : Converter::toString(deviceSample.sdCardVolumeSize);
+  json += F(",");
+  json += F("\"temperature\": ");
+  // json += deviceSample.temperature;
+  json += deviceSample.temperature == OA_MIN_FLOAT ? F("null") : Converter::toString(deviceSample.temperature);
   // json += F(",");
   
   json += F("},");
@@ -156,38 +166,45 @@ static String EventBuilder::deviceSampleBlockToJSON(DeviceSampleBlock deviceSamp
 }
 
 static String EventBuilder::environmentSampleBlockToJSON(EnvironmentSampleBlock environmentSample) {
+  // Serial.println(F("EventBuilder::environmentSampleBlockToJSON()"));
   String json = F("");
   json += F("\"environmentSample\": {");
   json += F("\"roomTemperature\": ");
-  json += environmentSample.roomTemperature;
+  // json += environmentSample.roomTemperature;
+  json += environmentSample.roomTemperature == OA_MIN_FLOAT ? F("null") : Converter::toString(environmentSample.roomTemperature);
   json += F(",");
   json += F("\"relativeHumidity\": ");
-  json += environmentSample.relativeHumidity;
+  // json += environmentSample.relativeHumidity;
+  json += environmentSample.relativeHumidity == OA_MIN_FLOAT ? F("null") : Converter::toString(environmentSample.relativeHumidity);
   json += F(",");
   json += F("\"heatIndex\": ");
-  json += environmentSample.heatIndex;
+  // json += environmentSample.heatIndex;
+  json += environmentSample.heatIndex == OA_MIN_FLOAT ? F("null") : Converter::toString(environmentSample.heatIndex);
   json += F(",");
   json += F("\"atmosphericPressure\": ");
-  json += environmentSample.atmosphericPressure;
+  // json += environmentSample.atmosphericPressure;
+  json += environmentSample.atmosphericPressure == OA_MIN_FLOAT ? F("null") : Converter::toString(environmentSample.atmosphericPressure);
   json += F(",");
   json += F("\"altitude\": ");
-  json += environmentSample.altitude;
+  // json += environmentSample.altitude;
+  json += environmentSample.altitude == OA_MIN_FLOAT ? F("null") : Converter::toString(environmentSample.altitude);
   // json += F(",");
   json += F("},");
   return json;
 }
 
 static String EventBuilder::waterSampleBlockToJSON(WaterSampleBlock waterSample) {
+  // Serial.println(F("EventBuilder::waterSampleBlockToJSON()"));
   String json = F("");
   json += F("\"waterSample\": {");
   json += F("\"temperature1\": ");
-  json += waterSample.temperature1;
+  json += waterSample.temperature1 == OA_MIN_FLOAT ? F("null") : Converter::toString(waterSample.temperature1);
   json += F(",");
   json += F("\"temperature2\": ");
-  json += waterSample.temperature2;
+  json += waterSample.temperature2 == OA_MIN_FLOAT ? F("null") : Converter::toString(waterSample.temperature2);
   json += F(",");
   json += F("\"totalDissolvedSolids\": ");
-  json += waterSample.totalDissolvedSolids;
+  json += waterSample.totalDissolvedSolids == OA_MIN_FLOAT ? F("null") : Converter::toString(waterSample.totalDissolvedSolids);
   json += F(",");
   json += F("\"waterLevelLow\": ");
   json += waterSample.waterLevelLow == true ? F("true") : F("false");
@@ -200,4 +217,28 @@ static String EventBuilder::waterSampleBlockToJSON(WaterSampleBlock waterSample)
   // json += F(",");
   json += F("}");
   return json;
+}
+
+static bool EventBuilder::checkNullFloat(float data) {
+  return data == OA_MIN_FLOAT;
+}
+
+static bool EventBuilder::checkNullUInt8(uint8_t data) {
+  return data == data == UINT8_MAX;
+}
+
+static bool EventBuilder::checkNullUInt16(uint16_t data) {
+  return data == UINT16_MAX;
+}
+
+static bool EventBuilder::checkNullUInt32(uint32_t data) {
+  return data == UINT32_MAX;
+}
+
+static bool EventBuilder::checkNullUInt64(uint64_t data) {
+  return data == UINT64_MAX;
+}
+
+static bool EventBuilder::checkNullString(String data) {
+  return data.length() == 0;
 }

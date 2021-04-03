@@ -1,7 +1,7 @@
 #include "RealTimeClock.h"
 
 void RealTimeClock::setup() {
-  Serial.println(F("RealTimeClock::setup()"));
+  // Serial.println(F("RealTimeClock::setup()"));
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
     Serial.flush();

@@ -1,6 +1,8 @@
 #ifndef OA_DEVICE_H
 #define OA_DEVICE_H
 
+#include "../util/limits.h"
+
 #include <Arduino.h>
 
 /*
@@ -25,6 +27,8 @@ class Device {
       // int getFreeFlash();
       
       // int getFreeEEPROM();
+
+      float getDeviceInbuiltTemperature();
 
 };
 

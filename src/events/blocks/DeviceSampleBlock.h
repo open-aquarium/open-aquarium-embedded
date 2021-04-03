@@ -9,6 +9,7 @@ typedef struct {
   uint32_t sdCardClusterCount;
   uint8_t sdCardBlocksPerCluster;
   uint32_t sdCardTotalBlocks;
+  float temperature;
 } DeviceSampleBlock;
 
 #endif

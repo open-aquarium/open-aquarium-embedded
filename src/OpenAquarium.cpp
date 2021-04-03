@@ -4,7 +4,7 @@ void OpenAquarium::setup() {
   Serial.begin(9600);
   while(!Serial);
 
-  this->log.info(F("OpenAquarium::setup"));
+  this->log.debug(F("OpenAquarium::setup"));
   this->sdcard.printDebug(F("OpenAquarium::setup"));
 
   this->buzzer.playBeep();
@@ -74,7 +74,7 @@ void OpenAquarium::loop() {
 
 void OpenAquarium::deviceReady() {
   this->ready = true;
-  this->log.info(F("deviceReady()"));
+  this->log.debug(F("deviceReady()"));
   this->sdcard.printDebug(F("OpenAquarium::deviceReady()"));
   // set status led to READY
 }
@@ -86,7 +86,7 @@ void OpenAquarium::reportError(String message) {
 }
 
 void OpenAquarium::discoveryEvent() {
-  // this->log.info(F("OpenAquarium::loop->discovery"));
+  this->log.debug(F("OpenAquarium::loop->discovery"));
   this->sdcard.printDebug(F("OpenAquarium::loop->discovery"));
   DiscoveryEvent discoveryEvent;
   discoveryEvent = this->buildDiscovery();
@@ -94,38 +94,17 @@ void OpenAquarium::discoveryEvent() {
   String json = EventBuilder::discoveryToJSON(discoveryEvent); 
   this->log.info(json);
   this->sdcard.println(json);
-
-  String data = F("DISCOVERY ");
-
-  data += this->realTimeClock.nowAsISOString();
-  
-  data += F("  SD Card type: ");
-  data += this->sdcard.cardType();
-
-  data += F("  SD Volume type: ");
-  data += this->sdcard.volumeType();
-
-  data += F("  SD Cluster count: ");
-  data += this->sdcard.clusterCount();
-
-  data += F("  SD Blocks: ");
-  data += this->sdcard.blocksPerCluster();
-
-  data += F("  SD Volume size: ");
-  data += this->sdcard.volumeSize();
-
-  this->log.info(data);
-  this->sdcard.println(data);
 }
 
 void OpenAquarium::periodicEvent() {
   // Add to debug log
-  // this->log.info(F("OpenAquarium::loop->periodic"));
   this->sdcard.printDebug(F("OpenAquarium::loop->periodic"));
+  this->log.debug(F("OpenAquarium::loop->periodic"));
   PeriodicEvent periodicEvent;
   periodicEvent = this->buildPeriodic();
   
   String json = EventBuilder::periodicToJSON(periodicEvent); 
+  this->log.debug(F("OpenAquarium::this->periodicToJSON(periodicEvent)"));
   this->log.info(json);
   this->sdcard.println(json);
 
@@ -133,15 +112,15 @@ void OpenAquarium::periodicEvent() {
 
   data += this->realTimeClock.nowAsISOString();
 
-  float humidity = this->ERROR_FLOAT_READING;
-  float temperature = this->ERROR_FLOAT_READING;
-  float heatIndex = this->ERROR_FLOAT_READING;
+  float humidity = OA_MIN_FLOAT;
+  float temperature = OA_MIN_FLOAT;
+  float heatIndex = OA_MIN_FLOAT;
   humidity = dht.readHumidity();
   temperature = dht.readTemperature(); // Celsius
-  if (isnan(humidity) || isnan(temperature)) {
+  /*if (isnan(humidity) || isnan(temperature)) {
     this->reportError(F("Failed to read from DHT sensor!"));
     return;
-  }  
+  }  */
   heatIndex = dht.computeHeatIndex(temperature, humidity, false);
 
   data += F("  Humidity: ");
@@ -238,7 +217,7 @@ void OpenAquarium::setupBMP() {
 }
 
 DiscoveryEvent OpenAquarium::buildDiscovery() {
-  // Serial.println("OpenAquarium::buildDiscovery()");
+  this->log.debug(F("OpenAquarium::buildDiscovery()"));
   DiscoveryEvent discovery1;
   discovery1.header = this->buildHeaderBlock(1);
   discovery1.device = this->buildDeviceBlock();
@@ -248,7 +227,7 @@ DiscoveryEvent OpenAquarium::buildDiscovery() {
 }
 
 PeriodicEvent OpenAquarium::buildPeriodic() {
-  // Serial.println("OpenAquarium::buildPeriodic()");
+  this->log.debug(F("OpenAquarium::buildPeriodic()"));
   PeriodicEvent periodic1;
   periodic1.header = this->buildHeaderBlock(2);
   periodic1.device = this->buildDeviceBlock();
@@ -259,7 +238,7 @@ PeriodicEvent OpenAquarium::buildPeriodic() {
 }
 
 HeaderBlock OpenAquarium::buildHeaderBlock(int eventType) {
-  // Serial.println("OpenAquarium::buildHeaderBlock()");
+  this->log.debug(F("OpenAquarium::buildHeaderBlock()"));
   HeaderBlock header1;
   if(eventType == 1) {
     header1.type = "DISCOVERY";
@@ -275,7 +254,7 @@ HeaderBlock OpenAquarium::buildHeaderBlock(int eventType) {
 }
 
 DeviceBlock OpenAquarium::buildDeviceBlock() {
-  // Serial.println("OpenAquarium::buildDeviceBlock()");
+  this->log.debug(F("OpenAquarium::buildDeviceBlock()"));
   DeviceBlock device1;
   device1.serialNumber = "A123";
   device1.softwareVersion = "1.0.0";
@@ -284,7 +263,7 @@ DeviceBlock OpenAquarium::buildDeviceBlock() {
 }
 
 RollCallDataBlock OpenAquarium::buildRollCallDataBlock() {
-  // Serial.println("OpenAquarium::buildRollCallData()");
+  this->log.debug(F("OpenAquarium::buildRollCallData()"));
   RollCallSensor rollCallSensor1;
   rollCallSensor1.id = 1000;
   rollCallSensor1.sensor = "ESP";
@@ -305,7 +284,7 @@ RollCallDataBlock OpenAquarium::buildRollCallDataBlock() {
 }
 
 DeviceSampleBlock OpenAquarium::buildDeviceSampleBlock() {
-  // Serial.println("OpenAquarium::buildDeviceSampleBlock();");
+  this->log.debug(F("OpenAquarium::buildDeviceSampleBlock();"));
   DeviceSampleBlock deviceSample1;
   deviceSample1.freeMemory = this->device.getFreeSRAM();
 
@@ -315,37 +294,38 @@ DeviceSampleBlock OpenAquarium::buildDeviceSampleBlock() {
   deviceSample1.sdCardBlocksPerCluster = this->sdcard.blocksPerCluster();
   deviceSample1.sdCardVolumeSize = this->sdcard.volumeSize();
 
+  deviceSample1.temperature = this->device.getDeviceInbuiltTemperature();
+
   return deviceSample1;
 }
 
 EnvironmentSampleBlock OpenAquarium::buildEnvironmentSampleBlock() {
-  // Serial.println("OpenAquarium::buildEnvironmentSampleBlock();");
+  this->log.debug(F("OpenAquarium::buildEnvironmentSampleBlock();"));
   EnvironmentSampleBlock environmentSample1;
   environmentSample1.roomTemperature = dht.readTemperature();
   environmentSample1.relativeHumidity = dht.readHumidity();
-  environmentSample1.heatIndex = this->ERROR_FLOAT_READING;
-  environmentSample1.atmosphericPressure = this->ERROR_FLOAT_READING;;
-  environmentSample1.altitude = this->ERROR_FLOAT_READING;;
+  environmentSample1.heatIndex = OA_MIN_FLOAT;
+  environmentSample1.atmosphericPressure = OA_MIN_FLOAT;
+  environmentSample1.altitude = OA_MIN_FLOAT;
 
-  if (!isnan(environmentSample1.relativeHumidity) && !isnan(environmentSample1.roomTemperature)) {
-    // this->reportError(F("Failed to read from DHT sensor!"));
-    // return;
+  if (isnan(environmentSample1.relativeHumidity) || isnan(environmentSample1.roomTemperature)) {
+    this->log.error(F("Failed to read from DHT sensor!"));
+  } else {
     environmentSample1.heatIndex = dht.computeHeatIndex(
       environmentSample1.roomTemperature, 
       environmentSample1.relativeHumidity, 
       false
     );
   }  
-  // float heatIndex = dht.computeHeatIndex(temperature, humidity, false);
   return environmentSample1;
 }
 
 WaterSampleBlock OpenAquarium::buildWaterSampleBlock() {
-  // Serial.println("OpenAquarium::buildWaterSampleBlock()");
+  this->log.debug(F("OpenAquarium::buildWaterSampleBlock()"));
   WaterSampleBlock waterSample1;
-  waterSample1.temperature1 = this->ERROR_FLOAT_READING;;
-  waterSample1.temperature2 = this->ERROR_FLOAT_READING;;
-  waterSample1.totalDissolvedSolids = this->ERROR_FLOAT_READING;;
+  waterSample1.temperature1 = OA_MIN_FLOAT;
+  waterSample1.temperature2 = OA_MIN_FLOAT;
+  waterSample1.totalDissolvedSolids = OA_MIN_FLOAT;
   waterSample1.waterLevelLow = true;
   waterSample1.waterLevelMedium = true;
   waterSample1.waterLevelHigh = true;
