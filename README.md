@@ -11,6 +11,7 @@
 | OLED Display | [Adafruit-GFX-Library](https://github.com/adafruit/Adafruit-GFX-Library)      | 1.10.6  |     |       |
 | OLED Display | [Adafruit_SSD1306](https://github.com/adafruit/Adafruit_SSD1306)              | 2.4.3   |     |       |
 | BMP280       | [Adafruit BMP280](https://github.com/adafruit/Adafruit_BMP280_Library)        | 2.1.1   |     |       |
+| esp8266      | [WifiEsp](https://github.com/bportaluri/WiFiEsp)                              | 2.2.2   |     |       |
 
 ## Data Types
 

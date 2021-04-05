@@ -36,3 +36,6 @@ node_modules/
 
 # IDE
 .idea/
+
+# libs
+doc/esp8266/esp8266_nonos_sdk*
