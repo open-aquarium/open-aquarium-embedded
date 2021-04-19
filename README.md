@@ -4,6 +4,7 @@
 
 | Equipment    | Lib                                                                           | Version | PIN | Notes |
 |--------------|-------------------------------------------------------------------------------|---------|-----|-------|
+|              | [FreeRTOS](https://github.com/feilipu/Arduino_FreeRTOS_Library)               | 10.4.3-8|     |         |
 | DHT22        | [adafruit/DHT-sensor-library](https://github.com/adafruit/DHT-sensor-library) | 1.4.2   |     |       |
 |              | [ArduinoJson](https://arduinojson.org)                                        | 6.17.3  |     |       |
 |              | [SD Lib](https://www.arduino.cc/en/Reference/SD)                              | 1.2.4   |     |       |

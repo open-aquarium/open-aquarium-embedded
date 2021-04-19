@@ -10,6 +10,7 @@ class RealTimeClock {
     RTC_DS3231 rtc;
   public:
     void setup();
+    void adjust(DateTime now);
     String nowAsISOString();
 };
 

@@ -1,5 +1,8 @@
 #include "RealTimeClock.h"
 
+/**
+ * Setup the RTC. Call this method before using RTC.
+ */
 void RealTimeClock::setup() {
   // Serial.println(F("RealTimeClock::setup()"));
   if (! rtc.begin()) {
@@ -7,18 +10,24 @@ void RealTimeClock::setup() {
     Serial.flush();
     abort();
   }
-  // CHANGE TO NTP sync
+  // Set default date in case the clock lost power
   if (rtc.lostPower()) {
-    Serial.println("RTC lost power, let's set the time!");
-    // When time needs to be set on a new device, or after a power loss, the
-    // following line sets the RTC to the date & time this sketch was compiled
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    // This line sets the RTC with an explicit date & time, for example to set
-    // January 21, 2014 at 3am you would call:
-    // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
+    // rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); // Compilation date/time
+    rtc.adjust(DateTime(2000, 1, 1, 0, 0, 0)); // arbitrary time
   }
 }
 
+/**
+ * Adjust the clock to a given date.
+ */
+void RealTimeClock::adjust(DateTime now) {
+  this->rtc.adjust(now);
+}
+
+/**
+ * Get the current time in ISO format.
+ * TODO refactor
+ */
 String RealTimeClock::nowAsISOString() {
   DateTime date = rtc.now();
   String result = F("");
