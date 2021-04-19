@@ -1,5 +1,9 @@
 #include "OpenAquariumRTOS.h"
 
+String OpenAquariumRTOS::getVersion() {
+  return this->VERSION;
+}
+
 bool OpenAquariumRTOS::isSystemReady() {
   return this->bootBasicSystem;
 }
@@ -32,33 +36,36 @@ void OpenAquariumRTOS::setup() {
   // ACTIVITY LED
   this->setupActivityLed();
 
+  // DISPLAY
+  this->display.setup();
+  this->display.displayWelcomeMessage();
+  delay(3000);
+  this->display.displayFusRoDah();
+  delay(1000);
+  this->display.sleepDisplay();
+
   // REAL TIME CLOCK
   this->realTimeClock.setup();
   Serial.println(F("Started: Real Time Clock."));
 
   // WIFI
   this->setupWiFi();
+  this->getNTPDate(); // TODO refactor
 
   // SYNC RTC/NTP
   // this->
 
-  // DISPLAY
-  // this->display.setup();
-
   // DHT - HUMIDITY, TEMPERATURE
-  // this->setupDHT();
+  this->setupDHT();
 
   // LDR - ENVIRONMENT LIGHT
-  // this->setupLDR();
+  this->setupLDR();
 
   // ENVIRONMENT NOISE
-  // this->setupSoundSensor();
+  this->setupSoundSensor();
 
   // BMP - BAROMETRIC PRESSURE
-  // this->setupBMP();
-
-  // DISPLAY
-  // this->display.setup();
+  this->setupBMP();
 
   // DIAGNOSTICS (check all sensors)
   // this->
@@ -217,4 +224,124 @@ String OpenAquariumRTOS::getGatewayIP() {
 int32_t OpenAquariumRTOS::getRSSI() {
   Serial.println(F("getRSSI()"));
   return WiFi.RSSI();
+}
+
+void OpenAquariumRTOS::setupDHT() {
+  this->dht.begin();
+}
+
+void OpenAquariumRTOS::setupLDR() {
+  pinMode(this->LDR_PIN, INPUT);
+}
+
+int OpenAquariumRTOS::readLDRSensor() {
+  return digitalRead(this->LDR_PIN);
+}
+
+void OpenAquariumRTOS::setupSoundSensor() {
+  // TODO replace with a better sensor
+  pinMode(this->SOUND_SENSOR_PIN, INPUT);
+}
+
+int OpenAquariumRTOS::readSoundSensor() {
+  // environment sound intensity > threshold = LOW
+  // environment sound intensity < threshold = HIGH
+  return digitalRead(this->SOUND_SENSOR_PIN);
+}
+
+void OpenAquariumRTOS::setupBMP() {
+  if (!this->bmp.begin()) {
+    // this->reportError(F("BMP sensor not found"));
+    Serial.println("BMP sensor not found");
+    Serial.flush();
+    abort();
+  }
+  /* Default settings from datasheet. */
+  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+                  Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+                  Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+                  Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+                  Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+}
+
+void OpenAquariumRTOS::sendNTPpacket(char *ntpSrv, byte packetBuffer[], int NTP_PACKET_SIZE, WiFiEspUDP Udp) {
+  // set all bytes in the buffer to 0
+  memset(packetBuffer, 0, NTP_PACKET_SIZE);
+  // Initialize values needed to form NTP request
+  // (see URL above for details on the packets)
+
+  packetBuffer[0] = 0b11100011;   // LI, Version, Mode
+  packetBuffer[1] = 0;     // Stratum, or type of clock
+  packetBuffer[2] = 6;     // Polling Interval
+  packetBuffer[3] = 0xEC;  // Peer Clock Precision
+  // 8 bytes of zero for Root Delay & Root Dispersion
+  packetBuffer[12]  = 49;
+  packetBuffer[13]  = 0x4E;
+  packetBuffer[14]  = 49;
+  packetBuffer[15]  = 52;
+
+  // all NTP fields have been given values, now
+  // you can send a packet requesting a timestamp:
+  Udp.beginPacket(ntpSrv, 123); //NTP requests are to port 123
+
+  Udp.write(packetBuffer, NTP_PACKET_SIZE);
+
+  Udp.endPacket();
+}
+
+void OpenAquariumRTOS::getNTPDate() {
+  // NTP
+  char timeServer[] = "time.nist.gov";
+  unsigned int localPort = 2390;
+  const int NTP_PACKET_SIZE = 48;
+  const int UDP_TIMEOUT = 2000;
+  byte packetBuffer[NTP_PACKET_SIZE];
+  WiFiEspUDP Udp;
+  Udp.begin(localPort);
+  sendNTPpacket(timeServer, packetBuffer, NTP_PACKET_SIZE, Udp);
+  unsigned long startMs = millis();
+  while (!Udp.available() && (millis() - startMs) < UDP_TIMEOUT) {}
+  Serial.println(Udp.parsePacket());
+  if (Udp.parsePacket()) {
+    Serial.println("packet received");
+    // We've received a packet, read the data from it into the buffer
+    Udp.read(packetBuffer, NTP_PACKET_SIZE);
+
+    // the timestamp starts at byte 40 of the received packet and is four bytes,
+    // or two words, long. First, esxtract the two words:
+
+    unsigned long highWord = word(packetBuffer[40], packetBuffer[41]);
+    unsigned long lowWord = word(packetBuffer[42], packetBuffer[43]);
+    // combine the four bytes (two words) into a long integer
+    // this is NTP time (seconds since Jan 1 1900):
+    unsigned long secsSince1900 = highWord << 16 | lowWord;
+    Serial.print("Seconds since Jan 1 1900 = ");
+    Serial.println(secsSince1900);
+
+    // now convert NTP time into everyday time:
+    Serial.print("Unix time = ");
+    // Unix time starts on Jan 1 1970. In seconds, that's 2208988800:
+    const unsigned long seventyYears = 2208988800UL;
+    // subtract seventy years:
+    unsigned long epoch = secsSince1900 - seventyYears;
+    // print Unix time:
+    Serial.println(epoch);
+
+
+    // print the hour, minute and second:
+    Serial.print("The UTC time is ");       // UTC is the time at Greenwich Meridian (GMT)
+    Serial.print((epoch  % 86400L) / 3600); // print the hour (86400 equals secs per day)
+    Serial.print(':');
+    if (((epoch % 3600) / 60) < 10) {
+      // In the first 10 minutes of each hour, we'll want a leading '0'
+      Serial.print('0');
+    }
+    Serial.print((epoch  % 3600) / 60); // print the minute (3600 equals secs per minute)
+    Serial.print(':');
+    if ((epoch % 60) < 10) {
+      // In the first 10 seconds of each minute, we'll want a leading '0'
+      Serial.print('0');
+    }
+    Serial.println(epoch % 60); // print the second
+  }
 }
