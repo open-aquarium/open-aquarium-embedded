@@ -92,8 +92,8 @@ void OpenAquariumRTOS::blinkActivityLed(bool on) {
 }
 
 void OpenAquariumRTOS::connectWiFi() {
-  char ssid[] = "estado-da-arte-2.4";
-  char pwd[] = "guilherme5543988036135";
+  char ssid[] = "";
+  char pwd[] = "";
   WiFi.begin(ssid, pwd);
 }
 
