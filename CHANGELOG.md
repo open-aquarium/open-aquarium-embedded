@@ -1,3 +1,13 @@
+# [0.3.0](https://github.com/open-aquarium/open-aquarium-embedded/compare/v0.2.0...v0.3.0) (2021-08-22)
+
+
+### Features
+
+* **device:** add a barometric pressure sensor ([67069ca](https://github.com/open-aquarium/open-aquarium-embedded/commit/67069ca770d8e141881968048faa0e7f52afa951)), closes [open-aquarium/open-aquarium#48](https://github.com/open-aquarium/open-aquarium/issues/48)
+* **device:** add sound sensor ([3c2f150](https://github.com/open-aquarium/open-aquarium-embedded/commit/3c2f1501f735b6c088141ecfa150bb91fba65c9e)), closes [open-aquarium/open-aquarium#26](https://github.com/open-aquarium/open-aquarium/issues/26)
+
+
+
 # [0.2.0](https://github.com/open-aquarium/open-aquarium-embedded/compare/v0.1.0...v0.2.0) (2021-03-21)
 
 
