@@ -14,7 +14,7 @@ bool OpenAquariumRTOS::isSystemReady() {
 
 // void OpenAquariumRTOS::setProductionMode(bool prod) {
 //   this->productionMode = prod;
-// }  
+// }
 
 void OpenAquariumRTOS::setup() {
   Serial.begin(9600);

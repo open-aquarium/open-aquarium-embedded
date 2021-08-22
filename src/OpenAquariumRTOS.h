@@ -37,7 +37,7 @@ class OpenAquariumRTOS {
   public:
     const uint16_t DISCOVERY_INTERVAL = 10000; // 86400000 1 day
     const uint16_t PERIODIC_INTERVAL = 5000; // 300000 5 min
-    const uint8_t ACTIVITY_LED_INTERVAL = 200;
+    const uint8_t ACTIVITY_LED_INTERVAL = 800;
 
     String getVersion();
     bool isSystemReady();

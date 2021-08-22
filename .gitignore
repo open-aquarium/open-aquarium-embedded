@@ -41,3 +41,6 @@ node_modules/
 doc/esp8266/esp8266_nonos_sdk*
 
 data/
+
+# backup
+*.bkp

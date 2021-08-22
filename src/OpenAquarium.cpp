@@ -8,41 +8,47 @@ void OpenAquarium::setup() {
   this->sdcard.printDebug(F("OpenAquarium::setup"));
 
   this->buzzer.playBeep();
-  
+
   this->setupActivityLed();
 
   // Real Time Clock
   this->realTimeClock.setup();
 
   // Display
-  this->display.setup();
+  // this->display.setup();
 
   // Environment Humidity and Temperature
-  this->setupDHT();
+  // this->setupDHT();
+
   // Environment Light
-  this->setupLDR();
+  // this->setupLDR();
+
   // Environment Sound
-  this->setupSoundSensor();
+  // this->setupSoundSensor();
+
   // Environment BMP
-  this->setupBMP();
+  // this->setupBMP();
 
-  this->display.displayWelcomeMessage();
-  delay(3000);
-  this->display.displayFusRoDah();
-  delay(1000);
-  this->display.sleepDisplay();
+  // WiFi
+  setupWiFi();
 
-  this->deviceReady();
+  // this->display.displayWelcomeMessage();
+  // delay(3000);
+  // this->display.displayFusRoDah();
+  // delay(1000);
+  // this->display.sleepDisplay();
 
-  String version = F("");
-  version += F("Date ");
-  version += this->realTimeClock.nowAsISOString();
-  version += F("  Version ");
-  version += this->getVersion();
-  version += F("  BUILD ");
-  version += this->getBuildVersion();
-  this->log.info(version);
-  this->sdcard.printDebug(version);
+  // this->deviceReady();
+
+  // String version = F("");
+  // version += F("Date ");
+  // version += this->realTimeClock.nowAsISOString();
+  // version += F("  Version ");
+  // version += this->getVersion();
+  // version += F("  BUILD ");
+  // version += this->getBuildVersion();
+  // this->log.info(version);
+  // this->sdcard.printDebug(version);
 }
 
 void OpenAquarium::loop() {
@@ -291,3 +297,260 @@ WaterSampleBlock OpenAquarium::buildWaterSampleBlock() {
   waterSample1.waterLevelHigh = true;
   return waterSample1;
 }
+
+void OpenAquarium::setupWiFi() {
+  this->log.debug(F("setupWiFi()"));
+  Serial3.begin(115200);
+  WiFi.init(&Serial3);
+  this->connectWiFi();
+
+  String message = F("");
+  message += F("Firmware ");
+  message += getFirmwareVersion();
+  message += F("  SSID ");
+  message += this->getWiFiSSID();
+  message += F("  Status ");
+  message += this->getWiFiStatus();
+  message += F("  MAC ");
+  message += this->getMacAddress();
+  message += F("  IP ");
+  message += this->getIP();
+  message += F("  Subnet Mask ");
+  message += this->getSubnetMask();
+  message += F("  Gateway ");
+  message += this->getGatewayIP();
+  message += F("  RSSI ");
+  message += this->getRSSI();
+  this->log.info(message);
+
+  // NTP
+  char timeServer[] = "time.nist.gov";
+  unsigned int localPort = 2390;
+  const int NTP_PACKET_SIZE = 48;
+  const int UDP_TIMEOUT = 2000;
+  byte packetBuffer[NTP_PACKET_SIZE];
+  WiFiEspUDP Udp;
+  Udp.begin(localPort);
+  sendNTPpacket(timeServer, packetBuffer, NTP_PACKET_SIZE, Udp);
+  unsigned long startMs = millis();
+  while (!Udp.available() && (millis() - startMs) < UDP_TIMEOUT) {}
+  Serial.println(Udp.parsePacket());
+  if (Udp.parsePacket()) {
+    Serial.println("packet received");
+    // We've received a packet, read the data from it into the buffer
+    Udp.read(packetBuffer, NTP_PACKET_SIZE);
+
+    // the timestamp starts at byte 40 of the received packet and is four bytes,
+    // or two words, long. First, esxtract the two words:
+
+    unsigned long highWord = word(packetBuffer[40], packetBuffer[41]);
+    unsigned long lowWord = word(packetBuffer[42], packetBuffer[43]);
+    // combine the four bytes (two words) into a long integer
+    // this is NTP time (seconds since Jan 1 1900):
+    unsigned long secsSince1900 = highWord << 16 | lowWord;
+    Serial.print("Seconds since Jan 1 1900 = ");
+    Serial.println(secsSince1900);
+
+    // now convert NTP time into everyday time:
+    Serial.print("Unix time = ");
+    // Unix time starts on Jan 1 1970. In seconds, that's 2208988800:
+    const unsigned long seventyYears = 2208988800UL;
+    // subtract seventy years:
+    unsigned long epoch = secsSince1900 - seventyYears;
+    // print Unix time:
+    Serial.println(epoch);
+
+
+    // print the hour, minute and second:
+    Serial.print("The UTC time is ");       // UTC is the time at Greenwich Meridian (GMT)
+    Serial.print((epoch  % 86400L) / 3600); // print the hour (86400 equals secs per day)
+    Serial.print(':');
+    if (((epoch % 3600) / 60) < 10) {
+      // In the first 10 minutes of each hour, we'll want a leading '0'
+      Serial.print('0');
+    }
+    Serial.print((epoch  % 3600) / 60); // print the minute (3600 equals secs per minute)
+    Serial.print(':');
+    if ((epoch % 60) < 10) {
+      // In the first 10 seconds of each minute, we'll want a leading '0'
+      Serial.print('0');
+    }
+    Serial.println(epoch % 60); // print the second
+  }
+
+  /*WiFiUDP udp;
+  NTPClient ntp(udp, "0.br.pool.ntp.org", -3 * 3600, 60000);
+  ntp.begin();
+  //ntp.forceUpdate();
+  while(!ntp.update())
+    {
+        Serial.print(".");
+        ntp.forceUpdate();
+        delay(500);
+    }
+
+  char* strDate = (char*)ntp.getFormattedDate().c_str();
+
+  //Passa os dados da string para a struct
+  Date date;
+  sscanf(strDate, "%d-%d-%dT%d:%d:%dZ", 
+                  &date.year, 
+                  &date.month, 
+                  &date.day, 
+                  &date.hours, 
+                  &date.minutes,
+                  &date.seconds);
+
+  //Dia da semana de 0 a 6, sendo 0 o domingo
+  date.dayOfWeek = ntp.getDay();
+
+  message = F("NTP ");
+  message += ntp.getFormattedTime();
+  message += date.day;
+  message += "/";
+  message += date.month;
+  message += "/";
+  message += date.year;
+  message += " ";
+  message += date.hours;
+  message += ":";
+  message += date.minutes;
+  message += ":";
+  message += date.seconds;
+  this->log.info(message);*/
+}
+
+void OpenAquarium::sendNTPpacket(char *ntpSrv, byte packetBuffer[], int NTP_PACKET_SIZE, WiFiEspUDP Udp)
+{
+  // set all bytes in the buffer to 0
+  memset(packetBuffer, 0, NTP_PACKET_SIZE);
+  // Initialize values needed to form NTP request
+  // (see URL above for details on the packets)
+
+  packetBuffer[0] = 0b11100011;   // LI, Version, Mode
+  packetBuffer[1] = 0;     // Stratum, or type of clock
+  packetBuffer[2] = 6;     // Polling Interval
+  packetBuffer[3] = 0xEC;  // Peer Clock Precision
+  // 8 bytes of zero for Root Delay & Root Dispersion
+  packetBuffer[12]  = 49;
+  packetBuffer[13]  = 0x4E;
+  packetBuffer[14]  = 49;
+  packetBuffer[15]  = 52;
+
+  // all NTP fields have been given values, now
+  // you can send a packet requesting a timestamp:
+  Udp.beginPacket(ntpSrv, 123); //NTP requests are to port 123
+
+  Udp.write(packetBuffer, NTP_PACKET_SIZE);
+
+  Udp.endPacket();
+}
+
+void OpenAquarium::connectWiFi() {
+  char ssid[] = "";
+  char pwd[] = "";
+  WiFi.begin(ssid, pwd);
+}
+
+String OpenAquarium::getFirmwareVersion() {
+  this->log.debug(F("getFirmwareVersion()"));
+  return WiFi.firmwareVersion();
+}
+
+String OpenAquarium::getWiFiStatus() {
+  this->log.debug(F("getWiFiStatus()"));
+  uint8_t status = WiFi.status();
+  if(status == WL_CONNECTED) {
+    return F("Connected");
+  } else if(status == WL_NO_SHIELD) {
+    return F("No WiFi");
+  } else if(status == WL_IDLE_STATUS) {
+    return F("Idle");
+  } /*else if(status == WL_NO_SSID_AVAIL) {
+    return F("No SSID Available");
+  } else if(status == WL_SCAN_COMPLETED) {
+    return F("Scan Completed");
+  } */else if(status == WL_CONNECT_FAILED) {
+    return F("Connect Failed");
+  } /*else if(status == WL_CONNECTION_LOST) {
+    return F("Connection Lost");
+  } */else if(status == WL_DISCONNECTED) {
+    return F("Disconnected");
+  } else {
+    return F("Error");
+  }
+}
+
+String OpenAquarium::getWiFiSSID() {
+  this->log.debug(F("getWiFiSSID()"));
+  return WiFi.SSID();
+}
+
+String OpenAquarium::getMacAddress() {
+  this->log.debug(F("getMacAddress()"));
+  byte mac[6]={0,0,0,0,0,0};
+  WiFi.macAddress(mac);
+  String result = F("");
+  result += String(mac[5], HEX);
+  result += F(":");
+  result += String(mac[4], HEX);
+  result += F(":");
+  result += String(mac[3], HEX);
+  result += F(":");
+  result += String(mac[2], HEX);
+  result += F(":");
+  result += String(mac[1], HEX);
+  result += F(":");
+  result += String(mac[0], HEX);
+  return result;
+}
+
+String OpenAquarium::getIP() {
+  this->log.debug(F("getIP()"));
+  IPAddress ip = WiFi.localIP();
+  String result = F("");
+  result += ip[0];
+  result += F(".");
+  result += ip[1];
+  result += F(".");
+  result += ip[2];
+  result += F(".");
+  result += ip[3];
+  return result;
+}
+
+String OpenAquarium::getSubnetMask() {
+  this->log.debug(F("getSubnetMask()"));
+  //return WiFi.subnetMask();
+  IPAddress subnet = WiFi.subnetMask();
+  String result = F("");
+  result += subnet[0];
+  result += F(".");
+  result += subnet[1];
+  result += F(".");
+  result += subnet[2];
+  result += F(".");
+  result += subnet[3];
+  return result;
+}
+
+String OpenAquarium::getGatewayIP() {
+  this->log.debug(F("getGatewayIP()"));
+  //return WiFi.gatewayIP();
+  IPAddress gateway = WiFi.gatewayIP();
+  String result = F("");
+  result += gateway[0];
+  result += F(".");
+  result += gateway[1];
+  result += F(".");
+  result += gateway[2];
+  result += F(".");
+  result += gateway[3];
+  return result;
+}
+
+int32_t OpenAquarium::getRSSI() {
+  this->log.debug(F("getRSSI()"));
+  return WiFi.RSSI();
+}
+

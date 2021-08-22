@@ -32,11 +32,19 @@
 #include "events/blocks/EnvironmentSampleBlock.h"
 #include "events/blocks/WaterSampleBlock.h"
 
+#include "WiFiEsp.h"
+#include "WiFiEspUdp.h"
+//#include <NTPClient.h>
+
 #include <Arduino.h>
 
 class OpenAquarium {
   private:
     const String VERSION = "0.2.0";
+
+    // BOOT
+    bool bootBasicSystem = false;
+    bool bootOS = false;
     
     Log log;
   
@@ -111,7 +119,21 @@ class OpenAquarium {
     WaterSampleBlock buildWaterSampleBlock();
     DiscoveryEvent buildDiscovery();
     PeriodicEvent buildPeriodic();
-  
+
+    // WiFi
+    void setupWiFi();
+    void connectWiFi();
+    String getFirmwareVersion();
+    String getWiFiStatus();
+    String getWiFiSSID();
+    String getMacAddress();
+    String getIP();
+    String getSubnetMask();
+    String getGatewayIP();
+    int32_t getRSSI();
+
+    void sendNTPpacket(char *ntpSrv, byte packetBuffer[], int NTP_PACKET_SIZE, WiFiEspUDP Udp);
+    
   public:
     OpenAquarium() :
       sdcard(SDCARD_CS_PIN),
