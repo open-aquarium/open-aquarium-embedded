@@ -8,7 +8,7 @@
 class CustomWiFi {
 
   private:
-    void sendNTPpacket(char *ntpSrv, byte packetBuffer[], int NTP_PACKET_SIZE, WiFiEspUDP Udp);
+    WiFiEspClient client;
 
   public:
 
@@ -25,8 +25,9 @@ class CustomWiFi {
     String getSubnetMask();
     String getGatewayIP();
     int32_t getRSSI();
-    String getNTPDate();
+    unsigned long getNTPDate();
 
+    bool ping(String hostname);
 };
 
 #endif

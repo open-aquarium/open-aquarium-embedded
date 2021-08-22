@@ -141,84 +141,20 @@ int32_t CustomWiFi::getRSSI() {
   return WiFi.RSSI();
 }
 
-String CustomWiFi::getNTPDate() {
-  // TODO refactor
-  Serial.println("DEBUG #1");
-  String now = F("");
-  // NTP
-  // char timeServer[] = "time.nist.gov";
-  char timeServer[] = "a.ntp.br";
+unsigned long CustomWiFi::getNTPDate() {
+  bool debug = false;
+  // Source: https://github.com/bportaluri/WiFiEsp/blob/master/examples/UdpNTPClient/UdpNTPClient.ino
+  unsigned long epoch = 0;
+  String now = "";
+  char timeServer[] = "time.nist.gov";
   unsigned int localPort = 2390;
   const int NTP_PACKET_SIZE = 48;
   const int UDP_TIMEOUT = 2000;
   byte packetBuffer[NTP_PACKET_SIZE];
   WiFiEspUDP Udp;
   Udp.begin(localPort);
-  Serial.println("DEBUG #2");
-  sendNTPpacket(timeServer, packetBuffer, NTP_PACKET_SIZE, Udp);
-  Serial.println("DEBUG #3");
-  unsigned long startMs = millis();
-  while (!Udp.available() && (millis() - startMs) < UDP_TIMEOUT) {Serial.println("DEBUG #3.1");
-  }
-  Serial.print("Packet=");
-  Serial.println(Udp.parsePacket());
-  Serial.println("DEBUG #4");
-  if (Udp.parsePacket()) {
-    Serial.println("packet received");
-    // We've received a packet, read the data from it into the buffer
-    Udp.read(packetBuffer, NTP_PACKET_SIZE);
-
-    // the timestamp starts at byte 40 of the received packet and is four bytes,
-    // or two words, long. First, esxtract the two words:
-
-    unsigned long highWord = word(packetBuffer[40], packetBuffer[41]);
-    unsigned long lowWord = word(packetBuffer[42], packetBuffer[43]);
-    // combine the four bytes (two words) into a long integer
-    // this is NTP time (seconds since Jan 1 1900):
-    unsigned long secsSince1900 = highWord << 16 | lowWord;
-    Serial.print("Seconds since Jan 1 1900 = ");
-    Serial.println(secsSince1900);
-
-    // now convert NTP time into everyday time:
-    Serial.print("Unix time = ");
-    // Unix time starts on Jan 1 1970. In seconds, that's 2208988800:
-    const unsigned long seventyYears = 2208988800UL;
-    // subtract seventy years:
-    unsigned long epoch = secsSince1900 - seventyYears;
-    // print Unix time:
-    Serial.println(epoch);
-    now += epoch;
-    now += F("T");
-
-    // print the hour, minute and second:
-    Serial.print("The UTC time is ");       // UTC is the time at Greenwich Meridian (GMT)
-    Serial.print((epoch  % 86400L) / 3600); // print the hour (86400 equals secs per day)
-    now += (epoch  % 86400L) / 3600;
-    now += F(":");
-    Serial.print(':');
-    if (((epoch % 3600) / 60) < 10) {
-      // In the first 10 minutes of each hour, we'll want a leading '0'
-      Serial.print('0');
-      now += F("0");
-    }
-    Serial.print((epoch  % 3600) / 60); // print the minute (3600 equals secs per minute)
-    now += (epoch  % 3600) / 60;
-    now += F(":");
-    Serial.print(':');
-    if ((epoch % 60) < 10) {
-      // In the first 10 seconds of each minute, we'll want a leading '0'
-      Serial.print('0');
-      now += F("0");
-    }
-    Serial.println(epoch % 60); // print the second
-    now += epoch % 60;
-    return now;
-  }
-  Serial.println("DEBUG #99");
-  return now;
-}
-
-void CustomWiFi::sendNTPpacket(char *ntpSrv, byte packetBuffer[], int NTP_PACKET_SIZE, WiFiEspUDP Udp) {
+  /**********************************************************************/
+  // sendNTPpacket(timeServer);
   // set all bytes in the buffer to 0
   memset(packetBuffer, 0, NTP_PACKET_SIZE);
   // Initialize values needed to form NTP request
@@ -236,9 +172,106 @@ void CustomWiFi::sendNTPpacket(char *ntpSrv, byte packetBuffer[], int NTP_PACKET
 
   // all NTP fields have been given values, now
   // you can send a packet requesting a timestamp:
-  Udp.beginPacket(ntpSrv, 123); //NTP requests are to port 123
+  Udp.beginPacket(timeServer, 123); //NTP requests are to port 123
 
   Udp.write(packetBuffer, NTP_PACKET_SIZE);
 
   Udp.endPacket();
+  /**********************************************************************/
+  // wait for a reply for UDP_TIMEOUT miliseconds
+  unsigned long startMs = millis();
+  while (!Udp.available() && (millis() - startMs) < UDP_TIMEOUT) {}
+  if(debug) {
+    Serial.println(Udp.parsePacket());
+  }
+  if (Udp.parsePacket()) {
+    if(debug) {
+      Serial.println("packet received");
+    }
+    // We've received a packet, read the data from it into the buffer
+    Udp.read(packetBuffer, NTP_PACKET_SIZE);
+
+    // the timestamp starts at byte 40 of the received packet and is four bytes,
+    // or two words, long. First, esxtract the two words:
+
+    unsigned long highWord = word(packetBuffer[40], packetBuffer[41]);
+    unsigned long lowWord = word(packetBuffer[42], packetBuffer[43]);
+    // combine the four bytes (two words) into a long integer
+    // this is NTP time (seconds since Jan 1 1900):
+    unsigned long secsSince1900 = highWord << 16 | lowWord;
+    if(debug) {
+      Serial.print("Seconds since Jan 1 1900 = ");
+      Serial.println(secsSince1900);
+
+      // now convert NTP time into everyday time:
+      Serial.print("Unix time = ");
+    }
+    // Unix time starts on Jan 1 1970. In seconds, that's 2208988800:
+    const unsigned long seventyYears = 2208988800UL;
+    // subtract seventy years:
+    // unsigned long epoch = secsSince1900 - seventyYears;
+    epoch = secsSince1900 - seventyYears;
+    // print Unix time:
+    if(debug) {
+      Serial.println(epoch);
+    }
+
+
+    // print the hour, minute and second:
+    if(debug) {
+      Serial.print("The UTC time is ");       // UTC is the time at Greenwich Meridian (GMT)
+      Serial.print((epoch  % 86400L) / 3600); // print the hour (86400 equals secs per day)
+      Serial.print(':');
+      if (((epoch % 3600) / 60) < 10) {
+        // In the first 10 minutes of each hour, we'll want a leading '0'
+        Serial.print('0');
+      }
+      Serial.print((epoch  % 3600) / 60); // print the minute (3600 equals secs per minute)
+      Serial.print(':');
+      if ((epoch % 60) < 10) {
+        // In the first 10 seconds of each minute, we'll want a leading '0'
+        Serial.print('0');
+      }
+      Serial.println(epoch % 60); // print the second
+    }
+  }
+  Udp.stop();
+
+  // TODO result validation
+  if(epoch < 1629665697) {
+    return 0;
+  }
+  
+  return epoch;
+}
+
+bool CustomWiFi::ping(String hostname) {
+  Serial.println("CustomWiFi::ping");
+  Serial.println(hostname);
+
+  char server[] = "worldtimeapi.org";
+  if (client.connect(server, 80)) {
+    Serial.println("Connected to server.");
+    // Make a HTTP request
+    client.println("GET /api/timezone/Etc/UTC HTTP/1.1");
+    client.println("Host: worldtimeapi.org");
+    client.println("Connection: close");
+    client.println();
+  } else {
+    Serial.println("Connection failed.");
+  }
+  delay(10000);
+  while (client.available()) {
+    // Serial.println("CLIENT AVAILABLE");
+    char c = client.read();
+    Serial.print(c);
+  }
+  // client.stop();
+  if (!client.connected()) {
+    // Serial.println();
+    Serial.println("Disconnecting from server...");
+    client.stop();
+  }
+  // return WiFi.ping(hostname) >= 0;
+  return true;
 }
