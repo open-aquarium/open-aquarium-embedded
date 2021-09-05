@@ -51,6 +51,9 @@ void OpenAquariumRTOS2::setup() {
   // DHT
   this->setupDHT();
 
+  // BMP
+  this->setupBMP();
+
   /*******************************************************************************
    * WATER SENSORS
    *******************************************************************************/
@@ -121,10 +124,24 @@ void OpenAquariumRTOS2::setupDHT() {
   this->dht.begin();
 }
 
+void OpenAquariumRTOS2::setupBMP() {
+  if (!this->bmp.begin()) {
+    this->sdcard.printError(F("BMP sensor not found"));
+    Serial.println(F("BMP sensor not found"));
+  }
+  /* Default settings from datasheet. */
+  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+                  Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+                  Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+                  Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+                  Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+}
+
 void OpenAquariumRTOS2::loop() {
   unsigned long currentMillis = millis();
   this->activityLedTask(currentMillis);
   this->dht22Task(currentMillis);
+  this->bmp280Task(currentMillis);
   this->discoveryTask(currentMillis);
   this->periodicTask(currentMillis);
   this->rtcSynchronizationTask(currentMillis);
@@ -309,6 +326,21 @@ void OpenAquariumRTOS2::dht22Task(unsigned long currentMillis) {
         false
       );
     }
+  }
+}
+
+void OpenAquariumRTOS2::bmp280Task(unsigned long currentMillis) {
+  if (currentMillis - this->previousBmp280Millis >= this->bmp280Interval) {
+    // TODO loglevel info
+    // Serial.print(this->realTimeClock.nowAsISOString());
+    // Serial.println(" OpenAquariumRTOS2::dht22Task()");
+    this->previousBmp280Millis = currentMillis;
+    String info = this->realTimeClock.nowAsISOString();
+    info += " OpenAquariumRTOS2::bmp280Task";
+    this->sdcard.printLog(info);
+    this->environmentSample.roomTemperature2 = this->bmp.readTemperature();
+    this->environmentSample.atmosphericPressure = this->bmp.readPressure(); // Pascal
+    this->environmentSample.altitude = this->bmp.readAltitude(1016.5); // Regional adjustment
   }
 }
 

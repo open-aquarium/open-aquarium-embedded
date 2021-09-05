@@ -16,6 +16,7 @@
 
 // ENVIRONMENT SENSORS
 #include "DHT.h"
+#include <Adafruit_BMP280.h>
 
 // Samples
 #include "events/blocks/DeviceSampleBlock.h"
@@ -49,6 +50,8 @@ class OpenAquariumRTOS2 {
     unsigned long previousWifiReconnectionMillis = 0;
     const long deviceInterval = 2000;
     unsigned long previousDeviceMillis = 0;
+    const long bmp280Interval = 2000;
+    unsigned long previousBmp280Millis = 0;
     const long testInterval = 2000;
     unsigned long previousTestMillis = 0;
 
@@ -110,6 +113,10 @@ class OpenAquariumRTOS2 {
     DHT dht;
     void setupDHT();
 
+    // BMP280
+    Adafruit_BMP280 bmp;
+    void setupBMP();
+
     /*******************************************************************************
      * WATHER SENSORS
      *******************************************************************************/
@@ -164,6 +171,7 @@ class OpenAquariumRTOS2 {
     void discoveryTask(unsigned long currentMillis);
     void periodicTask(unsigned long currentMillis);
     void dht22Task(unsigned long currentMillis);
+    void bmp280Task(unsigned long currentMillis);
     void rtcSynchronizationTask(unsigned long currentMillis);
     void wifiReconnectionTask(unsigned long currentMillis);
     void deviceTask(unsigned long currentMillis);
