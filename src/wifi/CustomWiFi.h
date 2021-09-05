@@ -28,6 +28,8 @@ class CustomWiFi {
     unsigned long getNTPDate();
 
     bool ping(String hostname);
+
+    bool isConnected();
 };
 
 #endif

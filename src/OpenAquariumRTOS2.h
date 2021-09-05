@@ -6,17 +6,17 @@
 #include "display/Display.h"
 #include "rtc/RealTimeClock.h"
 #include "wifi/CustomWiFi.h"
+#include "sdCard/SDCard.h"
+#include "device/Device.h"
 
 // #include "events/blocks/HeaderBlock.h"
-// #include "events/blocks/DeviceBlock.h"
+#include "events/blocks/DeviceBlock.h"
 // #include "events/blocks/RollCallDataBlock.h"
 // #include "events/blocks/RollCallSensor.h"
-// #include "events/blocks/DeviceSampleBlock.h"
-#include "events/blocks/EnvironmentSampleBlock.h"
-// #include "events/blocks/WaterSampleBlock.h"
 
 // ENVIRONMENT SENSORS
 #include "DHT.h"
+#include <Adafruit_BMP280.h>
 
 // Samples
 #include "events/blocks/DeviceSampleBlock.h"
@@ -31,7 +31,6 @@
  */
 class OpenAquariumRTOS2 {
   private:
-    const String VERSION = "0.3.0";
     const bool DEBUG = true;
     const bool DEBUG_WIFI = false;
     
@@ -47,11 +46,19 @@ class OpenAquariumRTOS2 {
     unsigned long previousDht22Millis = 0;
     const long rtcSynchronizationInterval = 3600000; // 1h
     unsigned long previousRtcSynchronizationMillis = 0;
+    const long wifiReconnectionInterval = 5000; // 5s
+    unsigned long previousWifiReconnectionMillis = 0;
+    const long deviceInterval = 2000;
+    unsigned long previousDeviceMillis = 0;
+    const long bmp280Interval = 2000;
+    unsigned long previousBmp280Millis = 0;
     const long testInterval = 2000;
     unsigned long previousTestMillis = 0;
 
     float roomTemperature1 = -1000;
     float relativeHumidity = -1000;
+
+    DeviceBlock deviceBlock;
 
     // SAMPLES
     DeviceSampleBlock deviceSample;
@@ -60,16 +67,15 @@ class OpenAquariumRTOS2 {
     const float ABSOLUTE_ZERO = -273.15;
     const unsigned long INTERVAL_24H = 86400;
   public:
+    const char SOFTWARE_VERSION = "0.3.0";
+    const char HARDWARE_VERSION = "0.1.0";
+    const char SERIAL_NUMBER = "9b1d53c5-bb7f-4b5e-a5e7-6490de1ceaa6";
+
     const uint16_t DISCOVERY_INTERVAL = 10000; // 86400000 1 day
     const uint16_t PERIODIC_INTERVAL = 5000; // 300000 5 min
     const uint8_t ACTIVITY_LED_INTERVAL = 200;
     const uint16_t NTP_INTERVAL = 60000;
     const uint16_t WIFI_RECONNECTION_INTERVAL = 60000;
-
-    /**
-     * Get the Software version.
-     **/
-    String getVersion();
 
     // ACTIVITY LED
     const uint8_t ACTIVITY_LED_PIN = 13;
@@ -87,6 +93,13 @@ class OpenAquariumRTOS2 {
     // WIFI
     CustomWiFi wifi;
 
+    // SD Card
+    const uint8_t SDCARD_CS_PIN = 53;
+    SDCard sdcard; //(SDCARD_CS_PIN);
+
+    // DEVICE
+    Device device;
+
     /*******************************************************************************
      * DEVICE SENSORS
      *******************************************************************************/
@@ -100,6 +113,10 @@ class OpenAquariumRTOS2 {
     DHT dht;
     void setupDHT();
 
+    // BMP280
+    Adafruit_BMP280 bmp;
+    void setupBMP();
+
     /*******************************************************************************
      * WATHER SENSORS
      *******************************************************************************/
@@ -109,6 +126,7 @@ class OpenAquariumRTOS2 {
      */
     OpenAquariumRTOS2() :
       buzzer(PASSIVE_BUZZER_PIN),
+      sdcard(SDCARD_CS_PIN),
       dht(DHT22_PIN, DHT22)
       {};
 
@@ -145,6 +163,7 @@ class OpenAquariumRTOS2 {
 
     void loop();
 
+    void initializeDeviceBlock();
     void initializeSamples();
     void sensorsCalibration();
 
@@ -152,7 +171,10 @@ class OpenAquariumRTOS2 {
     void discoveryTask(unsigned long currentMillis);
     void periodicTask(unsigned long currentMillis);
     void dht22Task(unsigned long currentMillis);
+    void bmp280Task(unsigned long currentMillis);
     void rtcSynchronizationTask(unsigned long currentMillis);
+    void wifiReconnectionTask(unsigned long currentMillis);
+    void deviceTask(unsigned long currentMillis);
 };
 
 #endif

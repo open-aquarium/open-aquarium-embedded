@@ -275,3 +275,7 @@ bool CustomWiFi::ping(String hostname) {
   // return WiFi.ping(hostname) >= 0;
   return true;
 }
+
+bool CustomWiFi::isConnected() {
+  return WiFi.status() == WL_CONNECTED;
+}

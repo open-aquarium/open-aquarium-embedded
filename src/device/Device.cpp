@@ -4,23 +4,17 @@
   
 }*/
 
-int Device::getFreeSRAM() {
-  #ifdef __arm__
-  // should use uinstd.h to define sbrk but Due causes a conflict
-  // extern "C" char* sbrk(int incr);
-  "C" char* sbrk(int incr);
-  #else  // __ARM__
-  // extern char *__brkval;
-  char *__brkval;
-  #endif  // __arm__
-  char top;
-  #ifdef __arm__
-  return &top - reinterpret_cast<char*>(sbrk(0));
-  #elif defined(CORE_TEENSY) || (ARDUINO > 103 && ARDUINO != 151)
-  return &top - __brkval;
-  #else  // __arm__
-  return __brkval ? &top - __brkval : &top - __malloc_heap_start;
-  #endif  // __arm__
+uint16_t Device::getFreeSRAM() {
+  return (int) SP - (int) (__brkval == 0 ? (int)&__heap_start : (int)__brkval);
+}
+
+uint16_t Device::getSRAMUsage() {
+  return this->getTotalSRAM() - this->getFreeSRAM();
+}
+
+uint16_t Device::getTotalSRAM() {
+//  return 8192; // 8 KB
+  return (int) RAMEND - (int) &__data_start;
 }
 
 /*int Device::getFreeFlash() {
@@ -60,6 +54,34 @@ float Device::getDeviceInbuiltTemperature() {
   t = (wADC - 324.31 ) / 1.22;
   return t;
   #else
-  return OA_MIN_FLOAT; //std::numeric_limits<float>::lowest();
+  return -273.15; // Absolute Zero Celcius //OA_MIN_FLOAT; //std::numeric_limits<float>::lowest();
   #endif
+}
+
+String Device::getCPU() {
+  return F("ATmega2560");
+}
+
+uint8_t Device::getCPUSpeed() {
+  return 16; // MHz
+}
+
+uint8_t Device::getAnalogIO() {
+  return 16;
+}
+
+uint8_t Device::getDigitalIO() {
+  return 54;
+}
+
+uint8_t Device::getDigitalPWM() {
+  return 15;
+}
+
+uint16_t Device::getTotalEEPROM() {
+  return 4096; // 4KB
+}
+
+uint32_t Device::getTotalFlash() {
+  return 33554432; // 32MB
 }

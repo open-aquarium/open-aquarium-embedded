@@ -2,14 +2,13 @@
 #define OA_EVENT_DEVICE_SAMPLE_BLOCK_H
 
 typedef struct {
-  uint8_t freeMemory;
-  String sdCardType;
-  String sdCardVolumeType;
-  uint32_t sdCardVolumeSize;
-  uint32_t sdCardClusterCount;
-  uint8_t sdCardBlocksPerCluster;
-  uint32_t sdCardTotalBlocks;
+  uint32_t freeMemory;
+  uint32_t usedMemory;
+  
   float temperature;
+
+  uint32_t sdCardFreeSpace;
+  uint32_t sdCardUsedSpace;
 } DeviceSampleBlock;
 
 #endif

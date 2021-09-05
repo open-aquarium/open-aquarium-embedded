@@ -1,9 +1,5 @@
 #include "OpenAquariumRTOS2.h"
 
-String OpenAquariumRTOS2::getVersion() {
-  return this->VERSION;
-}
-
 void OpenAquariumRTOS2::setup() {
   Serial.begin(9600);
   while(!Serial);
@@ -24,7 +20,8 @@ void OpenAquariumRTOS2::setup() {
   // ACTIVITY LED
   this->setupActivityLed();
 
-  // INITIALIZE SAMPLES
+  // INITIALIZE BLOCKS
+  initializeDeviceBlock();
   initializeSamples();
 
   // DISPLAY
@@ -53,6 +50,9 @@ void OpenAquariumRTOS2::setup() {
   
   // DHT
   this->setupDHT();
+
+  // BMP
+  this->setupBMP();
 
   /*******************************************************************************
    * WATER SENSORS
@@ -124,42 +124,129 @@ void OpenAquariumRTOS2::setupDHT() {
   this->dht.begin();
 }
 
+void OpenAquariumRTOS2::setupBMP() {
+  if (!this->bmp.begin()) {
+    this->sdcard.printError(F("BMP sensor not found"));
+    Serial.println(F("BMP sensor not found"));
+  }
+  /* Default settings from datasheet. */
+  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+                  Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+                  Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+                  Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+                  Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+}
+
 void OpenAquariumRTOS2::loop() {
   unsigned long currentMillis = millis();
   this->activityLedTask(currentMillis);
   this->dht22Task(currentMillis);
+  this->bmp280Task(currentMillis);
   this->discoveryTask(currentMillis);
   this->periodicTask(currentMillis);
   this->rtcSynchronizationTask(currentMillis);
+  this->wifiReconnectionTask(currentMillis);
+  this->deviceTask(currentMillis);
   
-  /*
   if (currentMillis - this->previousTestMillis >= this->testInterval) {
     this->previousTestMillis = currentMillis;
-    Serial.println(" BEGIN TEST ----------");
+    Serial.println("BEGIN TEST ------------------------------");
     Serial.print(this->realTimeClock.nowAsISOString());
     Serial.println(F(" TEST"));
+    
+    Serial.println(F("DEVICE BLOCK"));
+    Serial.print("CPU ");
+    Serial.println(this->deviceBlock.cpu);
+    Serial.print("CPU Speed ");
+    Serial.println(this->deviceBlock.cpuSpeed);
+    Serial.print("EEPROM ");
+    Serial.println(this->deviceBlock.totalEEPROM);
+    Serial.print("Flash Memory ");
+    Serial.println(this->deviceBlock.totalFlash);
+    Serial.print("Total Memory ");
+    Serial.println(this->deviceBlock.totalMemory);
+    Serial.print("SD CARD -> cardType ");
+    Serial.println(this->deviceBlock.sdCardType);
+    Serial.print("SD CARD -> Volume Type ");
+    Serial.println(this->deviceBlock.sdCardVolumeType);
+    Serial.print("SD CARD -> Volume Size ");
+    Serial.println(this->deviceBlock.sdCardVolumeSize);
+    Serial.print("SD CARD -> Volume Cluster Count ");
+    Serial.println(this->deviceBlock.sdCardClusterCount);
+    Serial.print("SD CARD -> Volume Blocks per Cluster ");
+    Serial.println(this->deviceBlock.sdCardBlocksPerCluster);
+    Serial.print("SD CARD -> Total Blocks ");
+    Serial.println(this->deviceBlock.sdCardTotalBlocks);
+
+    Serial.println(F("DEVICE SAMPLES"));
+    
+    Serial.print("Free Memory ");
+    Serial.println(this->deviceSample.freeMemory);
+    Serial.print("Used Memory ");
+    Serial.println(this->deviceSample.usedMemory);
+    Serial.print("temperature ");
+    Serial.println(this->deviceSample.temperature);
+    Serial.print("SD CARD -> Free Space ");
+    Serial.println(this->deviceSample.sdCardFreeSpace);
+
+    Serial.println(F("ENVIRONMENT SAMPLES"));
     Serial.print("Temperature ");
     Serial.println(this->environmentSample.roomTemperature);
     Serial.print("Humidity ");
     Serial.println(this->environmentSample.relativeHumidity);
     Serial.print("Heat Index ");
     Serial.println(this->environmentSample.heatIndex);
-    Serial.println(" END TEST ----------");
+    Serial.print("Temperature 2 ");
+    Serial.println(this->environmentSample.roomTemperature2);
+    Serial.print("Atmosferic Pressure ");
+    Serial.println(this->environmentSample.atmosphericPressure);
+    Serial.print("Altitude ");
+    Serial.println(this->environmentSample.altitude);
+    Serial.print("Light Intensity ");
+    Serial.println(this->environmentSample.lightIntensity);
+    Serial.print("Noise Level ");
+    Serial.println(this->environmentSample.noiseLevel);
+    
+    Serial.println("END TEST ------------------------------");
   }
-  */
   
+}
+
+void OpenAquariumRTOS2::initializeDeviceBlock() {
+  this->deviceBlock.serialNumber = this->SERIAL_NUMBER;
+  this->deviceBlock.softwareVersion = this->SOFTWARE_VERSION;
+  this->deviceBlock.hardwareVersion = this->HARDWARE_VERSION;
+  /*this->deviceBlock.cpu = F("UNKNOWN");
+  this->deviceBlock.cpuSpeed = 0;
+  this->deviceBlock.totalEEPROM = 0;
+  this->deviceBlock.totalFlash = 0;
+  this->deviceBlock.totalMemory = 0;
+  this->deviceBlock.sdCardType = F("UNKNOWN");
+  this->deviceBlock.sdCardVolumeType = F("UNKNOWN");
+  this->deviceBlock.sdCardVolumeSize = 0;
+  this->deviceBlock.sdCardClusterCount = 0;
+  this->deviceBlock.sdCardBlocksPerCluster = 0;
+  this->deviceBlock.sdCardTotalBlocks = 0;*/
+
+  this->deviceBlock.cpu = this->device.getCPU();
+  this->deviceBlock.cpuSpeed = this->device.getCPUSpeed();
+  this->deviceBlock.totalEEPROM = this->device.getTotalEEPROM();
+  this->deviceBlock.totalFlash = this->device.getTotalFlash();
+  this->deviceBlock.totalMemory = this->device.getTotalSRAM();
+  this->deviceBlock.sdCardType = this->sdcard.cardType();
+  this->deviceBlock.sdCardVolumeType = this->sdcard.volumeType();
+  this->deviceBlock.sdCardVolumeSize = this->sdcard.volumeSize();
+  this->deviceBlock.sdCardClusterCount = this->sdcard.clusterCount();
+  this->deviceBlock.sdCardBlocksPerCluster = this->sdcard.blocksPerCluster();
+  this->deviceBlock.sdCardTotalBlocks = this->deviceBlock.sdCardBlocksPerCluster * this->deviceBlock.sdCardClusterCount;
 }
 
 void OpenAquariumRTOS2::initializeSamples() {
   // DEVICE
   this->deviceSample.freeMemory = 0;
-  this->deviceSample.sdCardType = "UNKNOWN";
-  this->deviceSample.sdCardVolumeType = "UNKNOWN";
-  this->deviceSample.sdCardVolumeSize = 0;
-  this->deviceSample.sdCardClusterCount = 0;
-  this->deviceSample.sdCardBlocksPerCluster = 0;
-  this->deviceSample.sdCardTotalBlocks = 0;
+  this->deviceSample.usedMemory = 0;
   this->deviceSample.temperature = this->ABSOLUTE_ZERO;
+  this->deviceSample.sdCardFreeSpace = 0;
 
   // ENVIRONMENT
   this->environmentSample.roomTemperature = this->ABSOLUTE_ZERO;
@@ -181,8 +268,10 @@ void OpenAquariumRTOS2::initializeSamples() {
 }
 
 void OpenAquariumRTOS2::sensorsCalibration() {
-  Serial.print(this->realTimeClock.nowAsISOString());
-  Serial.println("OpenAquariumRTOS2::sensorsCalibration()");
+  String info = this->realTimeClock.nowAsISOString();
+  info += " OpenAquariumRTOS2::sensorsCalibration()";
+  this->sdcard.printLog(info);
+  Serial.println(info);
   this->dht22Task(this->INTERVAL_24H);
 }
 
@@ -196,24 +285,32 @@ void OpenAquariumRTOS2::activityLedTask(unsigned long currentMillis) {
 void OpenAquariumRTOS2::discoveryTask(unsigned long currentMillis) {
   if (currentMillis - this->previousDiscoveryMillis >= this->discoveryInterval) {
     this->previousDiscoveryMillis = currentMillis;
-    Serial.print(this->realTimeClock.nowAsISOString());
-    Serial.println(F(" DISCOVERY"));
+    String info = this->realTimeClock.nowAsISOString();
+    info += " DISCOVERY";
+    this->sdcard.printLog(info);
+    Serial.println(info);
   }
 }
 
 void OpenAquariumRTOS2::periodicTask(unsigned long currentMillis) {
   if (currentMillis - this->previousPeriodicMillis >= this->periodicInterval) {
     this->previousPeriodicMillis = currentMillis;
-    Serial.print(this->realTimeClock.nowAsISOString());
-    Serial.println(F(" PERIODIC"));
+    String info = this->realTimeClock.nowAsISOString();
+    info += " PERIODIC";
+    this->sdcard.printLog(info);
+    Serial.println(info);
   }
 }
 
 void OpenAquariumRTOS2::dht22Task(unsigned long currentMillis) {
   if (currentMillis - this->previousDht22Millis >= this->dht22Interval) {
-    Serial.print(this->realTimeClock.nowAsISOString());
-    Serial.println(" OpenAquariumRTOS2::dht22Task()");
+    // TODO loglevel info
+    // Serial.print(this->realTimeClock.nowAsISOString());
+    // Serial.println(" OpenAquariumRTOS2::dht22Task()");
     this->previousDht22Millis = currentMillis;
+    String info = this->realTimeClock.nowAsISOString();
+    info += " OpenAquariumRTOS2::dht22Task";
+    this->sdcard.printLog(info);
     this->environmentSample.roomTemperature = this->dht.readTemperature();
     this->environmentSample.relativeHumidity = this->dht.readHumidity();
     this->environmentSample.heatIndex = this->ABSOLUTE_ZERO;
@@ -232,11 +329,30 @@ void OpenAquariumRTOS2::dht22Task(unsigned long currentMillis) {
   }
 }
 
+void OpenAquariumRTOS2::bmp280Task(unsigned long currentMillis) {
+  if (currentMillis - this->previousBmp280Millis >= this->bmp280Interval) {
+    // TODO loglevel info
+    // Serial.print(this->realTimeClock.nowAsISOString());
+    // Serial.println(" OpenAquariumRTOS2::dht22Task()");
+    this->previousBmp280Millis = currentMillis;
+    String info = this->realTimeClock.nowAsISOString();
+    info += " OpenAquariumRTOS2::bmp280Task";
+    this->sdcard.printLog(info);
+    this->environmentSample.roomTemperature2 = this->bmp.readTemperature();
+    this->environmentSample.atmosphericPressure = this->bmp.readPressure(); // Pascal
+    this->environmentSample.altitude = this->bmp.readAltitude(1016.5); // Regional adjustment
+  }
+}
+
 void OpenAquariumRTOS2::rtcSynchronizationTask(unsigned long currentMillis) {
   if (currentMillis - this->previousRtcSynchronizationMillis >= this->rtcSynchronizationInterval) {
-    Serial.print(this->realTimeClock.nowAsISOString());
-    Serial.println(" OpenAquariumRTOS2::rtcSynchronizationTask()");
+    // TODO loglevel info
+    // Serial.print(this->realTimeClock.nowAsISOString());
+    // Serial.println(" OpenAquariumRTOS2::rtcSynchronizationTask()");
     this->previousRtcSynchronizationMillis = currentMillis;
+    String info = this->realTimeClock.nowAsISOString();
+    info += " OpenAquariumRTOS2::rtcSynchronizationTask()";
+    this->sdcard.printLog(info);
     unsigned long epoch = this->wifi.getNTPDate();
     // TODO is NTP time correct?
     if(epoch > 1629665697 && epoch < 2576350497) {
@@ -244,5 +360,38 @@ void OpenAquariumRTOS2::rtcSynchronizationTask(unsigned long currentMillis) {
       struct tm  ts = Converter::epochToTmStruct(epoch);
       this->realTimeClock.adjust(DateTime(1900+ts.tm_year, ts.tm_mon+1, ts.tm_mday, ts.tm_hour, ts.tm_min, ts.tm_sec));
     }
+  }
+}
+
+void OpenAquariumRTOS2::wifiReconnectionTask(unsigned long currentMillis) {
+  if (currentMillis - this->previousWifiReconnectionMillis >= this->wifiReconnectionInterval) {
+    // TODO loglevel info
+    // Serial.print(this->realTimeClock.nowAsISOString());
+    // Serial.println(" OpenAquariumRTOS2::wifiReconnectionTask()");
+    this->previousWifiReconnectionMillis = currentMillis;
+    String info = this->realTimeClock.nowAsISOString();
+    info += " OpenAquariumRTOS2::wifiReconnectionTask";
+    this->sdcard.printLog(info);
+    if(!this->wifi.isConnected()) {
+      Serial.println("Reconnect");
+      this->sdcard.printLog("Reconnect");
+      this->wifi.connect();
+    }
+  }
+}
+
+void OpenAquariumRTOS2::deviceTask(unsigned long currentMillis) {
+  if (currentMillis - this->previousDeviceMillis >= this->deviceInterval) {
+    this->previousDeviceMillis = currentMillis;
+    // TODO loglevel info
+    String info = this->realTimeClock.nowAsISOString();
+    info += " OpenAquariumRTOS2::deviceTask";
+    this->sdcard.printLog(info);
+    Serial.println(info);
+
+    this->deviceSample.freeMemory = this->device.getFreeSRAM();
+    this->deviceSample.usedMemory = this->device.getSRAMUsage();
+    this->deviceSample.temperature = this->device.getDeviceInbuiltTemperature();
+    this->deviceSample.sdCardFreeSpace = this->sdcard.freeSpace();
   }
 }
