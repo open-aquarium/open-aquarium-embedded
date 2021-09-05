@@ -6,7 +6,7 @@
 |--------------|-------------------------------------------------------------------------------|---------|-----|-------|
 |              | [FreeRTOS](https://github.com/feilipu/Arduino_FreeRTOS_Library)               | 10.4.3-8|     |         |
 | DHT22        | [adafruit/DHT-sensor-library](https://github.com/adafruit/DHT-sensor-library) | 1.4.2   |     |       |
-|              | [ArduinoJson](https://arduinojson.org)                                        | 6.17.3  |     |       |
+|              | [ArduinoJson](https://arduinojson.org)                                        | 6.18.3  |     |       |
 |              | [SD Lib](https://www.arduino.cc/en/Reference/SD)                              | 1.2.4   |     |       |
 | DS3231       | [RTClib](https://github.com/adafruit/RTClib)                                  | 1.12.5  |     |       |
 | OLED Display | [Adafruit-GFX-Library](https://github.com/adafruit/Adafruit-GFX-Library)      | 1.10.6  |     |       |
