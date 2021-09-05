@@ -1,9 +1,5 @@
 #include "OpenAquariumRTOS2.h"
 
-String OpenAquariumRTOS2::getVersion() {
-  return this->VERSION;
-}
-
 void OpenAquariumRTOS2::setup() {
   Serial.begin(9600);
   while(!Serial);
@@ -24,7 +20,8 @@ void OpenAquariumRTOS2::setup() {
   // ACTIVITY LED
   this->setupActivityLed();
 
-  // INITIALIZE SAMPLES
+  // INITIALIZE BLOCKS
+  initializeDeviceBlock();
   initializeSamples();
 
   // DISPLAY
@@ -140,38 +137,38 @@ void OpenAquariumRTOS2::loop() {
     Serial.print(this->realTimeClock.nowAsISOString());
     Serial.println(F(" TEST"));
     
-    Serial.println(F("DEVICE SAMPLES"));
+    Serial.println(F("DEVICE BLOCK"));
     Serial.print("CPU ");
-    Serial.println(this->deviceSample.cpu);
+    Serial.println(this->deviceBlock.cpu);
     Serial.print("CPU Speed ");
-    Serial.println(this->deviceSample.cpuSpeed);
+    Serial.println(this->deviceBlock.cpuSpeed);
     Serial.print("EEPROM ");
-    Serial.println(this->deviceSample.totalEEPROM);
+    Serial.println(this->deviceBlock.totalEEPROM);
     Serial.print("Flash Memory ");
-    Serial.println(this->deviceSample.totalFlash);
+    Serial.println(this->deviceBlock.totalFlash);
+    Serial.print("Total Memory ");
+    Serial.println(this->deviceBlock.totalMemory);
+    Serial.print("SD CARD -> cardType ");
+    Serial.println(this->deviceBlock.sdCardType);
+    Serial.print("SD CARD -> Volume Type ");
+    Serial.println(this->deviceBlock.sdCardVolumeType);
+    Serial.print("SD CARD -> Volume Size ");
+    Serial.println(this->deviceBlock.sdCardVolumeSize);
+    Serial.print("SD CARD -> Volume Cluster Count ");
+    Serial.println(this->deviceBlock.sdCardClusterCount);
+    Serial.print("SD CARD -> Volume Blocks per Cluster ");
+    Serial.println(this->deviceBlock.sdCardBlocksPerCluster);
+    Serial.print("SD CARD -> Total Blocks ");
+    Serial.println(this->deviceBlock.sdCardTotalBlocks);
 
+    Serial.println(F("DEVICE SAMPLES"));
+    
     Serial.print("Free Memory ");
     Serial.println(this->deviceSample.freeMemory);
     Serial.print("Used Memory ");
     Serial.println(this->deviceSample.usedMemory);
-    Serial.print("Total Memory ");
-    Serial.println(this->deviceSample.totalMemory);
-
     Serial.print("temperature ");
     Serial.println(this->deviceSample.temperature);
-
-    Serial.print("SD CARD -> cardType ");
-    Serial.println(this->deviceSample.sdCardType);
-    Serial.print("SD CARD -> Volume Type ");
-    Serial.println(this->deviceSample.sdCardVolumeType);
-    Serial.print("SD CARD -> Volume Size ");
-    Serial.println(this->deviceSample.sdCardVolumeSize);
-    Serial.print("SD CARD -> Volume Cluster Count ");
-    Serial.println(this->deviceSample.sdCardClusterCount);
-    Serial.print("SD CARD -> Volume Blocks per Cluster ");
-    Serial.println(this->deviceSample.sdCardBlocksPerCluster);
-    Serial.print("SD CARD -> Total Blocks ");
-    Serial.println(this->deviceSample.sdCardTotalBlocks);
     Serial.print("SD CARD -> Free Space ");
     Serial.println(this->deviceSample.sdCardFreeSpace);
 
@@ -198,22 +195,40 @@ void OpenAquariumRTOS2::loop() {
   
 }
 
+void OpenAquariumRTOS2::initializeDeviceBlock() {
+  this->deviceBlock.serialNumber = this->SERIAL_NUMBER;
+  this->deviceBlock.softwareVersion = this->SOFTWARE_VERSION;
+  this->deviceBlock.hardwareVersion = this->HARDWARE_VERSION;
+  /*this->deviceBlock.cpu = F("UNKNOWN");
+  this->deviceBlock.cpuSpeed = 0;
+  this->deviceBlock.totalEEPROM = 0;
+  this->deviceBlock.totalFlash = 0;
+  this->deviceBlock.totalMemory = 0;
+  this->deviceBlock.sdCardType = F("UNKNOWN");
+  this->deviceBlock.sdCardVolumeType = F("UNKNOWN");
+  this->deviceBlock.sdCardVolumeSize = 0;
+  this->deviceBlock.sdCardClusterCount = 0;
+  this->deviceBlock.sdCardBlocksPerCluster = 0;
+  this->deviceBlock.sdCardTotalBlocks = 0;*/
+
+  this->deviceBlock.cpu = this->device.getCPU();
+  this->deviceBlock.cpuSpeed = this->device.getCPUSpeed();
+  this->deviceBlock.totalEEPROM = this->device.getTotalEEPROM();
+  this->deviceBlock.totalFlash = this->device.getTotalFlash();
+  this->deviceBlock.totalMemory = this->device.getTotalSRAM();
+  this->deviceBlock.sdCardType = this->sdcard.cardType();
+  this->deviceBlock.sdCardVolumeType = this->sdcard.volumeType();
+  this->deviceBlock.sdCardVolumeSize = this->sdcard.volumeSize();
+  this->deviceBlock.sdCardClusterCount = this->sdcard.clusterCount();
+  this->deviceBlock.sdCardBlocksPerCluster = this->sdcard.blocksPerCluster();
+  this->deviceBlock.sdCardTotalBlocks = this->deviceBlock.sdCardBlocksPerCluster * this->deviceBlock.sdCardClusterCount;
+}
+
 void OpenAquariumRTOS2::initializeSamples() {
   // DEVICE
-  this->deviceSample.cpu = F("UNKNOWN");
-  this->deviceSample.cpuSpeed = 0;
-  this->deviceSample.totalEEPROM = 0;
-  this->deviceSample.totalFlash = 0;
   this->deviceSample.freeMemory = 0;
   this->deviceSample.usedMemory = 0;
-  this->deviceSample.totalMemory = 0;
   this->deviceSample.temperature = this->ABSOLUTE_ZERO;
-  this->deviceSample.sdCardType = F("UNKNOWN");
-  this->deviceSample.sdCardVolumeType = F("UNKNOWN");
-  this->deviceSample.sdCardVolumeSize = 0;
-  this->deviceSample.sdCardClusterCount = 0;
-  this->deviceSample.sdCardBlocksPerCluster = 0;
-  this->deviceSample.sdCardTotalBlocks = 0;
   this->deviceSample.sdCardFreeSpace = 0;
 
   // ENVIRONMENT
@@ -342,21 +357,9 @@ void OpenAquariumRTOS2::deviceTask(unsigned long currentMillis) {
     this->sdcard.printLog(info);
     Serial.println(info);
 
-    this->deviceSample.cpu = this->device.getCPU();
-    this->deviceSample.cpuSpeed = this->device.getCPUSpeed();
-    this->deviceSample.totalEEPROM = this->device.getTotalEEPROM();
-    this->deviceSample.totalFlash = this->device.getTotalFlash();
     this->deviceSample.freeMemory = this->device.getFreeSRAM();
     this->deviceSample.usedMemory = this->device.getSRAMUsage();
-    this->deviceSample.totalMemory = 8 * 1024;
     this->deviceSample.temperature = this->device.getDeviceInbuiltTemperature();
-
-    this->deviceSample.sdCardType = this->sdcard.cardType();
-    this->deviceSample.sdCardVolumeType = this->sdcard.volumeType();
-    this->deviceSample.sdCardVolumeSize = this->sdcard.volumeSize();
-    this->deviceSample.sdCardClusterCount = this->sdcard.clusterCount();
-    this->deviceSample.sdCardBlocksPerCluster = this->sdcard.blocksPerCluster();
-    this->deviceSample.sdCardTotalBlocks = this->deviceSample.sdCardBlocksPerCluster * this->deviceSample.sdCardClusterCount;
     this->deviceSample.sdCardFreeSpace = this->sdcard.freeSpace();
   }
 }

@@ -93,7 +93,7 @@ static String EventBuilder::deviceBlockToJSON(DeviceBlock device) {
 static String EventBuilder::rollCallDataBlockToJSON(RollCallDataBlock rollCallData) {
   // Serial.println(F("EventBuilder::rollCallDataBlockToJSON()"));
   String json = F("");
-  json += F("\"rollCallData\": {");
+  /*json += F("\"rollCallData\": {");
   json += F("\"sensors\": [");
   
   String sensors = F("");
@@ -125,14 +125,14 @@ static String EventBuilder::rollCallDataBlockToJSON(RollCallDataBlock rollCallDa
   }
 
   json += F("]}");
-
+*/
   return json;
 }
 
 static String EventBuilder::deviceSampleBlockToJSON(DeviceSampleBlock deviceSample) {
   // Serial.println(F("EventBuilder::deviceSampleBlockToJSON()"));
   String json = F("");
-  json += F("\"deviceSample\": {");
+  /*json += F("\"deviceSample\": {");
   json += F("\"freeMemory\": ");
   // json += deviceSample.freeMemory;
   json += deviceSample.freeMemory == OA_MIN_FLOAT ? F("null") : Converter::toString(deviceSample.freeMemory);
@@ -161,7 +161,7 @@ static String EventBuilder::deviceSampleBlockToJSON(DeviceSampleBlock deviceSamp
   json += deviceSample.temperature == OA_MIN_FLOAT ? F("null") : Converter::toString(deviceSample.temperature);
   // json += F(",");
   
-  json += F("},");
+  json += F("},");*/
   return json;
 }
 
