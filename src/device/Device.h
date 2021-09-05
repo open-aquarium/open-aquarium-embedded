@@ -4,6 +4,7 @@
 #include "../util/limits.h"
 
 #include <Arduino.h>
+#include <MemoryUsage.h>
 
 /*
 ATmega328P
@@ -22,7 +23,17 @@ class Device {
 
       // Device();
 
-      int getFreeSRAM();
+      String getCPU();
+      uint8_t getCPUSpeed();
+      uint8_t getAnalogIO();
+      uint8_t getDigitalIO();
+      uint8_t getDigitalPWM();
+      uint16_t getTotalEEPROM();
+      uint32_t getTotalFlash();
+      
+      uint16_t getFreeSRAM();
+      uint16_t getSRAMUsage();
+      uint16_t getTotalSRAM();
 
       // int getFreeFlash();
       

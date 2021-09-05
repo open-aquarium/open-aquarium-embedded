@@ -7,6 +7,7 @@
 #include "rtc/RealTimeClock.h"
 #include "wifi/CustomWiFi.h"
 #include "sdCard/SDCard.h"
+#include "device/Device.h"
 
 // #include "events/blocks/HeaderBlock.h"
 // #include "events/blocks/DeviceBlock.h"
@@ -50,8 +51,8 @@ class OpenAquariumRTOS2 {
     unsigned long previousRtcSynchronizationMillis = 0;
     const long wifiReconnectionInterval = 5000; // 5s
     unsigned long previousWifiReconnectionMillis = 0;
-    const long sdcardInterval = 2000;
-    unsigned long previousSdcardMillis = 0;
+    const long deviceInterval = 2000;
+    unsigned long previousDeviceMillis = 0;
     const long testInterval = 2000;
     unsigned long previousTestMillis = 0;
 
@@ -95,6 +96,9 @@ class OpenAquariumRTOS2 {
     // SD Card
     const uint8_t SDCARD_CS_PIN = 53;
     SDCard sdcard; //(SDCARD_CS_PIN);
+
+    // DEVICE
+    Device device;
 
     /*******************************************************************************
      * DEVICE SENSORS
@@ -164,7 +168,7 @@ class OpenAquariumRTOS2 {
     void dht22Task(unsigned long currentMillis);
     void rtcSynchronizationTask(unsigned long currentMillis);
     void wifiReconnectionTask(unsigned long currentMillis);
-    void sdCardTask(unsigned long currentMillis);
+    void deviceTask(unsigned long currentMillis);
 };
 
 #endif

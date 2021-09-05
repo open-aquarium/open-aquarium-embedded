@@ -13,6 +13,8 @@
 | OLED Display | [Adafruit_SSD1306](https://github.com/adafruit/Adafruit_SSD1306)              | 2.4.3   |     |       |
 | BMP280       | [Adafruit BMP280](https://github.com/adafruit/Adafruit_BMP280_Library)        | 2.1.1   |     |       |
 | esp8266      | [WifiEsp](https://github.com/bportaluri/WiFiEsp)                              | 2.2.2   |     |       |
+| ATmega2560   | [MemoryUsage](https://github.com/Locoduino/MemoryUsage)                       | 2.21.1  |     |       |
+
 
 ## Data Types
 

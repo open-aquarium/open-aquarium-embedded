@@ -2,8 +2,18 @@
 #define OA_EVENT_DEVICE_SAMPLE_BLOCK_H
 
 typedef struct {
-  uint8_t freeMemory;
+  String cpu;
+  uint8_t cpuSpeed;
+
+  uint16_t totalEEPROM;
+  uint32_t totalFlash;
+
+  uint32_t freeMemory;
+  uint32_t usedMemory;
+  uint32_t totalMemory;
+
   float temperature;
+
   String sdCardType;
   String sdCardVolumeType;
   uint32_t sdCardVolumeSize;

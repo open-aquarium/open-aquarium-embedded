@@ -132,7 +132,7 @@ void OpenAquariumRTOS2::loop() {
   this->periodicTask(currentMillis);
   this->rtcSynchronizationTask(currentMillis);
   this->wifiReconnectionTask(currentMillis);
-  this->sdCardTask(currentMillis);
+  this->deviceTask(currentMillis);
   
   if (currentMillis - this->previousTestMillis >= this->testInterval) {
     this->previousTestMillis = currentMillis;
@@ -141,10 +141,25 @@ void OpenAquariumRTOS2::loop() {
     Serial.println(F(" TEST"));
     
     Serial.println(F("DEVICE SAMPLES"));
-    Serial.print("freeMemory ");
+    Serial.print("CPU ");
+    Serial.println(this->deviceSample.cpu);
+    Serial.print("CPU Speed ");
+    Serial.println(this->deviceSample.cpuSpeed);
+    Serial.print("EEPROM ");
+    Serial.println(this->deviceSample.totalEEPROM);
+    Serial.print("Flash Memory ");
+    Serial.println(this->deviceSample.totalFlash);
+
+    Serial.print("Free Memory ");
     Serial.println(this->deviceSample.freeMemory);
+    Serial.print("Used Memory ");
+    Serial.println(this->deviceSample.usedMemory);
+    Serial.print("Total Memory ");
+    Serial.println(this->deviceSample.totalMemory);
+
     Serial.print("temperature ");
     Serial.println(this->deviceSample.temperature);
+
     Serial.print("SD CARD -> cardType ");
     Serial.println(this->deviceSample.sdCardType);
     Serial.print("SD CARD -> Volume Type ");
@@ -185,14 +200,21 @@ void OpenAquariumRTOS2::loop() {
 
 void OpenAquariumRTOS2::initializeSamples() {
   // DEVICE
+  this->deviceSample.cpu = F("UNKNOWN");
+  this->deviceSample.cpuSpeed = 0;
+  this->deviceSample.totalEEPROM = 0;
+  this->deviceSample.totalFlash = 0;
   this->deviceSample.freeMemory = 0;
-  this->deviceSample.sdCardType = "UNKNOWN";
-  this->deviceSample.sdCardVolumeType = "UNKNOWN";
+  this->deviceSample.usedMemory = 0;
+  this->deviceSample.totalMemory = 0;
+  this->deviceSample.temperature = this->ABSOLUTE_ZERO;
+  this->deviceSample.sdCardType = F("UNKNOWN");
+  this->deviceSample.sdCardVolumeType = F("UNKNOWN");
   this->deviceSample.sdCardVolumeSize = 0;
   this->deviceSample.sdCardClusterCount = 0;
   this->deviceSample.sdCardBlocksPerCluster = 0;
   this->deviceSample.sdCardTotalBlocks = 0;
-  this->deviceSample.temperature = this->ABSOLUTE_ZERO;
+  this->deviceSample.sdCardFreeSpace = 0;
 
   // ENVIRONMENT
   this->environmentSample.roomTemperature = this->ABSOLUTE_ZERO;
@@ -311,15 +333,24 @@ void OpenAquariumRTOS2::wifiReconnectionTask(unsigned long currentMillis) {
   }
 }
 
-void OpenAquariumRTOS2::sdCardTask(unsigned long currentMillis) {
-  if (currentMillis - this->previousSdcardMillis >= this->sdcardInterval) {
-    this->previousSdcardMillis = currentMillis;
+void OpenAquariumRTOS2::deviceTask(unsigned long currentMillis) {
+  if (currentMillis - this->previousDeviceMillis >= this->deviceInterval) {
+    this->previousDeviceMillis = currentMillis;
     // TODO loglevel info
     String info = this->realTimeClock.nowAsISOString();
-    info += " OpenAquariumRTOS2::sdCardTask";
+    info += " OpenAquariumRTOS2::deviceTask";
     this->sdcard.printLog(info);
     Serial.println(info);
-    
+
+    this->deviceSample.cpu = this->device.getCPU();
+    this->deviceSample.cpuSpeed = this->device.getCPUSpeed();
+    this->deviceSample.totalEEPROM = this->device.getTotalEEPROM();
+    this->deviceSample.totalFlash = this->device.getTotalFlash();
+    this->deviceSample.freeMemory = this->device.getFreeSRAM();
+    this->deviceSample.usedMemory = this->device.getSRAMUsage();
+    this->deviceSample.totalMemory = 8 * 1024;
+    this->deviceSample.temperature = this->device.getDeviceInbuiltTemperature();
+
     this->deviceSample.sdCardType = this->sdcard.cardType();
     this->deviceSample.sdCardVolumeType = this->sdcard.volumeType();
     this->deviceSample.sdCardVolumeSize = this->sdcard.volumeSize();
