@@ -150,6 +150,7 @@ void OpenAquariumRTOS2::loop() {
   
   if (currentMillis - this->previousTestMillis >= this->testInterval) {
     this->previousTestMillis = currentMillis;
+    if(true) { return; }
     Serial.println("BEGIN TEST ------------------------------");
     Serial.print(this->realTimeClock.nowAsISOString());
     Serial.println(F(" TEST"));
@@ -273,6 +274,7 @@ void OpenAquariumRTOS2::sensorsCalibration() {
   this->sdcard.printLog(info);
   Serial.println(info);
   this->dht22Task(this->INTERVAL_24H);
+  this->bmp280Task(this->INTERVAL_24H);
 }
 
 void OpenAquariumRTOS2::activityLedTask(unsigned long currentMillis) {
@@ -289,6 +291,34 @@ void OpenAquariumRTOS2::discoveryTask(unsigned long currentMillis) {
     info += " DISCOVERY";
     this->sdcard.printLog(info);
     Serial.println(info);
+
+    StaticJsonDocument<300> doc;
+    doc["version"] = "1.0.0";
+    doc["header"]["type"] = "discovery";
+    doc["header"]["eventId"] = "487fbb27-3c4a-44c9-9ee6-4dc9c3961cbf";
+    doc["header"]["triggerTime"] = this->realTimeClock.nowAsISOString();
+    doc["device"]["serialNumber"] = this->SERIAL_NUMBER;
+    doc["device"]["softwareVersion"] = this->SOFTWARE_VERSION;
+    doc["device"]["hardwareVersion"] = this->HARDWARE_VERSION;
+    doc["device"]["cpu"] = this->deviceBlock.cpu;
+    doc["device"]["cpuSpeed"] = this->deviceBlock.cpuSpeed;
+    doc["device"]["totalEEPROM"] = this->deviceBlock.totalEEPROM;
+    doc["device"]["totalFlash"] = this->deviceBlock.totalFlash;
+    doc["device"]["totalMemory"] = this->deviceBlock.totalMemory;
+    doc["device"]["sdCardType"] = this->deviceBlock.sdCardType;
+    doc["device"]["sdCardVolumeType"] = this->deviceBlock.sdCardVolumeType;
+    doc["device"]["sdCardVolumeSize"] = this->deviceBlock.sdCardVolumeSize;
+    doc["device"]["sdCardClusterCount"] = this->deviceBlock.sdCardClusterCount;
+    doc["device"]["sdCardBlocksPerCluster"] = this->deviceBlock.sdCardBlocksPerCluster;
+    doc["device"]["sdCardTotalBlocks"] = this->deviceBlock.sdCardTotalBlocks;
+    JsonArray data = doc.createNestedArray("rollCallData");
+    data.add("DHT22");
+    data.add("BMP280");
+    serializeJson(doc, Serial);
+    Serial.println();
+    String output;
+    serializeJson(doc, output);
+    this->sdcard.printLog(output);
   }
 }
 
@@ -299,6 +329,58 @@ void OpenAquariumRTOS2::periodicTask(unsigned long currentMillis) {
     info += " PERIODIC";
     this->sdcard.printLog(info);
     Serial.println(info);
+
+    StaticJsonDocument<600> doc;
+    doc["version"] = "1.0.0";
+
+    doc["header"]["type"] = "periodic";
+    doc["header"]["eventId"] = "e0b67db4-99ba-41b0-b854-4cc721bf524e";
+    doc["header"]["triggerTime"] = this->realTimeClock.nowAsISOString();
+
+    doc["device"]["serialNumber"] = this->SERIAL_NUMBER;
+    doc["device"]["softwareVersion"] = this->SOFTWARE_VERSION;
+    doc["device"]["hardwareVersion"] = this->HARDWARE_VERSION;
+    doc["device"]["cpu"] = this->deviceBlock.cpu;
+    doc["device"]["cpuSpeed"] = this->deviceBlock.cpuSpeed;
+    doc["device"]["totalEEPROM"] = this->deviceBlock.totalEEPROM;
+    doc["device"]["totalFlash"] = this->deviceBlock.totalFlash;
+    doc["device"]["totalMemory"] = this->deviceBlock.totalMemory;
+    doc["device"]["sdCardType"] = this->deviceBlock.sdCardType;
+    doc["device"]["sdCardVolumeType"] = this->deviceBlock.sdCardVolumeType;
+    doc["device"]["sdCardVolumeSize"] = this->deviceBlock.sdCardVolumeSize;
+    doc["device"]["sdCardClusterCount"] = this->deviceBlock.sdCardClusterCount;
+    doc["device"]["sdCardBlocksPerCluster"] = this->deviceBlock.sdCardBlocksPerCluster;
+    doc["device"]["sdCardTotalBlocks"] = this->deviceBlock.sdCardTotalBlocks;
+
+    doc["deviceSample"]["batteryPowered"] = false;
+    doc["deviceSample"]["freeMemory"] = this->deviceSample.freeMemory;
+    doc["deviceSample"]["usedMemory"] = this->deviceSample.usedMemory;
+    doc["deviceSample"]["temperature"] = this->deviceSample.temperature;
+    doc["deviceSample"]["sdCardFreeSpace"] = this->deviceSample.sdCardFreeSpace;
+    doc["deviceSample"]["sdCardUsedSpace"] = this->deviceSample.sdCardUsedSpace;
+
+    doc["environmentSample"]["roomTemperature"] = this->environmentSample.roomTemperature;
+    doc["environmentSample"]["roomTemperature2"] = this->environmentSample.roomTemperature2;
+    doc["environmentSample"]["relativeHumidity"] = this->environmentSample.relativeHumidity;
+    doc["environmentSample"]["heatIndex"] = this->environmentSample.heatIndex;
+    doc["environmentSample"]["atmosphericPressure"] = this->environmentSample.atmosphericPressure;
+    doc["environmentSample"]["altitude"] = this->environmentSample.altitude;
+    doc["environmentSample"]["lightIntensity"] = -273.15;
+    doc["environmentSample"]["noiseLevel"] = -273.15;
+
+    doc["waterSample"]["temperature1"] = -273.15;
+    doc["waterSample"]["temperature2"] = -273.15;
+    doc["waterSample"]["totalDissolvedSolids"] = -273.15;
+    doc["waterSample"]["ph"] = -273.15;
+    doc["waterSample"]["waterLevelHigh"] = false;
+    doc["waterSample"]["waterLevelMedium"] = false;
+    doc["waterSample"]["waterLevelLow"] = true;
+    
+    serializeJson(doc, Serial);
+    Serial.println();
+    String output;
+    serializeJson(doc, output);
+    this->sdcard.printLog(output);
   }
 }
 

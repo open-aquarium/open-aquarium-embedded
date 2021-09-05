@@ -25,6 +25,7 @@
 
 // Util
 #include "util/converter.h"
+#include <ArduinoJson.h>
 
 /**
  * RTOS implementation of the Open Aquarium application
@@ -44,19 +45,19 @@ class OpenAquariumRTOS2 {
     unsigned long previousPeriodicMillis = 0;
     const long dht22Interval = 5000;
     unsigned long previousDht22Millis = 0;
+    const long bmp280Interval = 5000;
+    unsigned long previousBmp280Millis = 0;
     const long rtcSynchronizationInterval = 3600000; // 1h
     unsigned long previousRtcSynchronizationMillis = 0;
-    const long wifiReconnectionInterval = 5000; // 5s
+    const long wifiReconnectionInterval = 10000; // 5s
     unsigned long previousWifiReconnectionMillis = 0;
-    const long deviceInterval = 2000;
+    const long deviceInterval = 10000;
     unsigned long previousDeviceMillis = 0;
-    const long bmp280Interval = 2000;
-    unsigned long previousBmp280Millis = 0;
     const long testInterval = 2000;
     unsigned long previousTestMillis = 0;
 
-    float roomTemperature1 = -1000;
-    float relativeHumidity = -1000;
+    // float roomTemperature1 = -1000;
+    // float relativeHumidity = -1000;
 
     DeviceBlock deviceBlock;
 
@@ -67,9 +68,9 @@ class OpenAquariumRTOS2 {
     const float ABSOLUTE_ZERO = -273.15;
     const unsigned long INTERVAL_24H = 86400;
   public:
-    const char SOFTWARE_VERSION = "0.3.0";
-    const char HARDWARE_VERSION = "0.1.0";
-    const char SERIAL_NUMBER = "9b1d53c5-bb7f-4b5e-a5e7-6490de1ceaa6";
+    const String SOFTWARE_VERSION = "0.3.0";
+    const String HARDWARE_VERSION = "0.1.0";
+    const String SERIAL_NUMBER = "9b1d53c5-bb7f-4b5e-a5e7-6490de1ceaa6";
 
     const uint16_t DISCOVERY_INTERVAL = 10000; // 86400000 1 day
     const uint16_t PERIODIC_INTERVAL = 5000; // 300000 5 min
