@@ -45,6 +45,8 @@ class SDCard {
 
     uint32_t volumeSize();
 
+    uint32_t freeSpace();
+
     void println(String message);
 
     void printLog(String message);

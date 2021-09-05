@@ -64,6 +64,12 @@ uint32_t SDCard::volumeSize() {
   return volume.blocksPerCluster() * volume.clusterCount() / 2 * 1024;
 }
 
+uint32_t SDCard::freeSpace() {
+  // TODO calculate free space on the SD Card
+  // https://forum.arduino.cc/t/sd-card-read-available-space/136548/3
+  return 0;
+}
+
 void SDCard::println(String message) {
   this->println(this->DEFAULT_DATA_FILE, message);
 }
@@ -74,7 +80,7 @@ void SDCard::println(String file, String message) {
     myFile.println(message);
     myFile.close();
   } else {
-    Serial.println(F("error opening the file"));
+    Serial.println(F("error opening log file"));
   }
 }
 
